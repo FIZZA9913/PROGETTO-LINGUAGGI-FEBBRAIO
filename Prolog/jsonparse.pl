@@ -369,6 +369,28 @@ stringa_execute([C | Cs], Result, Temp, Q, Codes_left) :-
 */
 
 /*
+ * inizio predicato jsonobj
+*/
+
+jsonobj(Members, Trad_in, Trad_out) :-
+    atom(Trad_in),
+    atom_concat(Trad_in, '{', Temp),
+    jsonobj_execute(Members, Temp, Trad_out).
+
+jsonobj_execute([P | Ps], Trad_in, Trad_out) :-
+    traduzione_pair(P, Trad_in, Trad),
+    verifica_virgola([P | Ps], Virgola),
+    atom_concat(Trad, Virgola, Temp),
+    jsonobj_execute(Ps, Temp, Trad_out).
+
+jsonobj_execute([], Trad_in, Trad_out) :-
+    atom_concat(Trad_in, '}', Trad_out).
+
+/*
+ * fine predicato jsonobj
+*/
+
+/*
  * inizio predicato jsonarray
 */
 
@@ -414,6 +436,44 @@ jsonarray_execute([], Trad_in, Trad_out) :-
 
 /*
  * fine predicato jsonarray
+*/
+
+/*
+ * inizio predicato traduzione pair
+*/
+
+traduzione_pair(Pair, Trad_in, Trad_out) :-
+    atom(Trad_in),
+    term_to_atom(Pair, Atom),
+    atom_codes(Atom, Code_list),
+    stringa(Code_list, Result, Codes_left),
+    Codes_left = [44 | Cs],
+    term_to_atom(Result, Atom1),
+    atom_concat(Trad_in, Atom1, Temp),
+    atom_concat(Temp, ' : ', Temp1),
+    atom_codes(Atom2, Cs),
+    atom_to_term(Atom2, Term, []),
+    traduzione_pair_execute(Term, Temp1, Trad_out).
+
+traduzione_pair_execute(Term, Trad_in, Trad_out) :-
+    traduzione_pair_caso_base(Term),
+    !,
+    term_to_atom(Term, Atom),
+    atom_concat(Trad_in, Atom, Trad_out).
+
+traduzione_pair_execute(Term, Trad_in, Trad_out) :-
+    compound(Term),
+    !,
+    Term =.. Temp,
+    append(Temp, [Trad_in], Temp1),
+    append(Temp1, [Trad_out], Temp2),
+    Temp2 = [X | _],
+    chiamabile(X),
+    Predicate =.. Temp2,
+    call(Predicate).
+
+/*
+ * fine predicato traduzione pair
 */
 
 /*
@@ -502,7 +562,8 @@ jsonarray_caso_base(X) :-
     !.
 
 jsonarray_caso_base(X) :-
-    number(X).
+    number(X),
+    !.
 
 %fine
 %inizio
@@ -512,7 +573,23 @@ atomo_o_stringa(X) :-
     !.
 
 atomo_o_stringa(X) :-
-    string(X).
+    string(X),
+    !.
+
+%fine
+%inizio
+
+traduzione_pair_caso_base(X) :-
+    valore_base(X),
+    !.
+
+traduzione_pair_caso_base(X) :-
+    number(X),
+    !.
+
+traduzione_pair_caso_base(X) :-
+    string(X),
+    !.
 
 %fine
 
