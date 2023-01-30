@@ -441,8 +441,9 @@ jsonarray_execute([], Trad_in, Trad_out) :-
 */
 
 traduzione_pair((Key, Value), Trad_in, Trad_out) :-
-    string(key),
-    atom_string(Atom, Key),
+    term_string(Key, Stringa),
+    string(Stringa),
+    atom_string(Atom, Stringa),
     atom_concat(Trad_in, Atom, Temp),
     atom_concat(Temp, ' : ', Temp1),
     traduzione_pair_value(Value, Temp1, Trad_out).
