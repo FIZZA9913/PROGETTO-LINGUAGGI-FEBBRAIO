@@ -369,6 +369,26 @@ stringa_execute([C | Cs], Result, Temp, Q, Codes_left) :-
 */
 
 /*
+ * inizio predicato jsonobj
+*/
+
+jsonobj(Members, Trad_in, Trad_out) :-
+    atom(Trad_in),
+    atom_concat(Trad_in, '{', Temp),
+    jsonobj_execute(Members, Temp, Trad_out).
+
+jsonobj_execute([P | Ps], Trad_in, Trad_out) :-
+    traduzione_pair(P, Trad_in, Temp),
+    jsonobj_execute(Ps, Temp, Trad_out).
+
+jsonobj_execute([], Trad_in, Trad_out) :-
+    atom_concat(Trad_in, '}', Trad_out).
+
+/*
+ * fine predicato jsonobj
+*/
+
+/*
  * inizio predicato jsonarray
 */
 
@@ -378,7 +398,7 @@ jsonarray(Elements, Trad_in, Trad_out) :-
     jsonarray_execute(Elements, Temp, Trad_out).
 
 jsonarray_execute([E | Es], Trad_in, Trad_out) :-
-    jsonarray_caso_base(E),
+    caso_base(E),
     !,
     term_to_atom(E, Atom),
     verifica_virgola([E | Es], Virgola),
@@ -414,6 +434,45 @@ jsonarray_execute([], Trad_in, Trad_out) :-
 
 /*
  * fine predicato jsonarray
+*/
+
+/*
+ * inizio predicato traduzione pair
+*/
+
+traduzione_pair((Key, Value), Trad_in, Trad_out) :-
+    term_string(Key, Stringa),
+    string(Stringa),
+    atom_string(Atom, Stringa),
+    atom_concat(Trad_in, Atom, Temp),
+    atom_concat(Temp, ' : ', Temp1),
+    traduzione_pair_value(Value, Temp1, Trad_out).
+
+traduzione_pair_value(Value, Trad_in, Trad_out) :-
+    caso_base(Value),
+    !,
+    term_to_atom(Value, Atom),
+    atom_concat(Trad_in, Atom, Trad_out).
+
+traduzione_pair_value(Value, Trad_in, Trad_out) :-
+    string(Value),
+    !,
+    atom_string(Atom, Value),
+    atom_concat(Trad_in, Atom, Trad_out).
+
+traduzione_pair_value(Value, Trad_in, Trad_out) :-
+    compound(Value),
+    !,
+    Value =.. Temp,
+    append(Temp, [Trad_in], Temp1),
+    append(Temp1, [Trad_out], Temp2),
+    Temp2 = [X | _],
+    chiamabile(X),
+    Predicate =.. Temp2,
+    call(Predicate).
+
+/*
+ * fine predicato traduzione pair
 */
 
 /*
@@ -497,11 +556,11 @@ elemento_i_esimo_execute([_ | Is], Index, Result) :-
 %fine
 %inizio
 
-jsonarray_caso_base(X) :-
+caso_base(X) :-
     valore_base(X),
     !.
 
-jsonarray_caso_base(X) :-
+caso_base(X) :-
     number(X),
     !.
 

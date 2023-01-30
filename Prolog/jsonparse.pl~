@@ -378,9 +378,7 @@ jsonobj(Members, Trad_in, Trad_out) :-
     jsonobj_execute(Members, Temp, Trad_out).
 
 jsonobj_execute([P | Ps], Trad_in, Trad_out) :-
-    traduzione_pair(P, Trad_in, Trad),
-    verifica_virgola([P | Ps], Virgola),
-    atom_concat(Trad, Virgola, Temp),
+    traduzione_pair(P, Trad_in, Temp),
     jsonobj_execute(Ps, Temp, Trad_out).
 
 jsonobj_execute([], Trad_in, Trad_out) :-
@@ -400,7 +398,7 @@ jsonarray(Elements, Trad_in, Trad_out) :-
     jsonarray_execute(Elements, Temp, Trad_out).
 
 jsonarray_execute([E | Es], Trad_in, Trad_out) :-
-    jsonarray_caso_base(E),
+    caso_base(E),
     !,
     term_to_atom(E, Atom),
     verifica_virgola([E | Es], Virgola),
@@ -442,29 +440,29 @@ jsonarray_execute([], Trad_in, Trad_out) :-
  * inizio predicato traduzione pair
 */
 
-traduzione_pair(Pair, Trad_in, Trad_out) :-
-    atom(Trad_in),
-    term_to_atom(Pair, Atom),
-    atom_codes(Atom, Code_list),
-    stringa(Code_list, Result, Codes_left),
-    Codes_left = [44 | Cs],
-    term_to_atom(Result, Atom1),
-    atom_concat(Trad_in, Atom1, Temp),
+traduzione_pair((Key, Value), Trad_in, Trad_out) :-
+    string(key),
+    atom_string(Atom, Key),
+    atom_concat(Trad_in, Atom, Temp),
     atom_concat(Temp, ' : ', Temp1),
-    atom_codes(Atom2, Cs),
-    atom_to_term(Atom2, Term, []),
-    traduzione_pair_execute(Term, Temp1, Trad_out).
+    traduzione_pair_value(Value, Temp1, Trad_out).
 
-traduzione_pair_execute(Term, Trad_in, Trad_out) :-
-    traduzione_pair_caso_base(Term),
+traduzione_pair_value(Value, Trad_in, Trad_out) :-
+    caso_base(Value),
     !,
-    term_to_atom(Term, Atom),
+    term_to_atom(Value, Atom),
     atom_concat(Trad_in, Atom, Trad_out).
 
-traduzione_pair_execute(Term, Trad_in, Trad_out) :-
-    compound(Term),
+traduzione_pair_value(Value, Trad_in, Trad_out) :-
+    string(Value),
     !,
-    Term =.. Temp,
+    atom_string(Atom, Value),
+    atom_concat(Trad_in, Atom, Trad_out).
+
+traduzione_pair_value(Value, Trad_in, Trad_out) :-
+    compound(Value),
+    !,
+    Value =.. Temp,
     append(Temp, [Trad_in], Temp1),
     append(Temp1, [Trad_out], Temp2),
     Temp2 = [X | _],
@@ -557,11 +555,11 @@ elemento_i_esimo_execute([_ | Is], Index, Result) :-
 %fine
 %inizio
 
-jsonarray_caso_base(X) :-
+caso_base(X) :-
     valore_base(X),
     !.
 
-jsonarray_caso_base(X) :-
+caso_base(X) :-
     number(X),
     !.
 
@@ -573,21 +571,6 @@ atomo_o_stringa(X) :-
     !.
 
 atomo_o_stringa(X) :-
-    string(X),
-    !.
-
-%fine
-%inizio
-
-traduzione_pair_caso_base(X) :-
-    valore_base(X),
-    !.
-
-traduzione_pair_caso_base(X) :-
-    number(X),
-    !.
-
-traduzione_pair_caso_base(X) :-
     string(X),
     !.
 
