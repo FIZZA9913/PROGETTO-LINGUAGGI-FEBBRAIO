@@ -484,7 +484,7 @@ jsondump(JSON, FileName) :-
     compound(JSON),
     atomo_o_stringa(FileName),
     jsonparse(JSONString, JSON),
-    term_string(JSONString, Stringa),
+    atom_string(JSONString, Stringa),
     open(FileName, write, Out),
     write(Out, Stringa),
     close(Out).
