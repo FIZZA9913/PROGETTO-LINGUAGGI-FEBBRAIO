@@ -27,8 +27,7 @@ jsonparse(JSONString, Object) :-
     nonvar(JSONString),
     nonvar(Object),
     !,
-    jsonparse(JSONString, Object1),
-    Object1 = Object.
+    jsonparse(JSONString, Object).
 
 jsonparse(JSONString, Object) :-
     var(JSONString),
@@ -441,6 +440,7 @@ jsonarray_execute([], Trad_in, Trad_out) :-
 */
 
 traduzione_pair((Key, Value), Trad_in, Trad_out) :-
+    atom(Trad_in),
     term_string(Key, Stringa),
     string(Stringa),
     atom_string(Atom, Stringa),
