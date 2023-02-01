@@ -360,7 +360,89 @@ valore_base(true).
 valore_base(false).
 valore_base(null).
 
-elemento_i_esimo(List, Index, Result) :-
+
+/*
+ * fine predicati utils
+*/
+
+
+
+
+%JSONACCESS CON ARRAY
+jsonaccess(jsonarray(_), [], jsonarray(_)).
+jsonaccess(jsonarray(Elements), Field, Risultato) :- elemento_i_esimo(Elements, Field, Risultato).
+
+
+%JSONACCESS CON OBJECT - FIELD E' UNA LISTA
+%Caso base:
+jsonaccess(jsonobj(Members), [], jsonobj(Members)).
+
+%Caso iterativo:
+jsonaccess(jsonobj(Members), [Field | []], RisultatoFinale) :-
+    estrai_valore(Members, Field, Risultato),
+    valore_base(Risultato),
+    !,
+    RisultatoFinale = Risultato.
+
+%Caso iterativo:
+jsonaccess(jsonobj(Members), [Field | Fields], RisultatoFinale) :-
+    estrai_valore(Members, Field, Risultato),
+    composto(Risultato),
+    !,
+    jsonaccess(Risultato, Fields, RisultatoFinale).
+%Queste scritture possono essere abbreviate
+
+
+%JSONACCESS CON OBJECT - FIELD E' UNA STRINGA
+%Caso base:
+jsonaccess(jsonobj(Members), "", jsonobj(Members)).
+jsonaccess(jsonobj(Members), " ", jsonobj(Members)).
+
+
+%Caso iterativo:
+%Field è una stringa che contiene una chiave sola
+jsonacces(jsonobj(Members), Field, Risultato) :-
+    suddividi_field(Field, PrimoField, _),
+    estrai_valore(Members, PrimoField, ParaRisultato),
+    valore_base(ParaRisultato),
+    Risultato = ParaRisultato.
+
+%Caso iterativo:
+%Field è una stringa contenente più chiavi.
+jsonacces(jsonobj(Members), Field, Risultato) :-
+    suddividi_field(Field, PrimoField, AltriField),
+    estrai_valore(Members, PrimoField, ParaRisultato),
+    composto(ParaRisultato),
+    jsonaccess(ParaRisultato, AltriField, Risultato).
+
+
+
+%  jsonobj([(”nome”, ”Arthur”), (”cognome”, jsonarray[1, 2, 3])])
+%  ObjectList = [(”nome”, ”Arthur”), (”cognome”, jsonarray[1, 2, 3])]
+%  Fields = ["cognome", 1].
+
+
+
+%PARTE PREDICATI UTILS
+
+composto(jsonobj(_)).
+composto(jsonarray(_)).
+
+%Già presenti sopra
+/*
+ * valore_base(true).
+ * valore_base(null).
+ * valore_base(false).
+*/
+valore_base(number(_)).
+valore_base(string(_)).
+
+valore_base(X) :- not(composto(X)).
+
+%jsonarray può essere l'elemento iniziale oppure può essere un valore.
+%Per trovare l'N-esimo elemento uso il predicato
+%elemento_i_esimo.
+elemento_i_esimo(jsonarray(List), Index, Result) :-
     number(Index),
     elemento_i_esimo_execute(List, Index, Result).
 
@@ -375,65 +457,35 @@ elemento_i_esimo_execute([_ | Is], Index, Result) :-
     X is Index - 1,
     elemento_i_esimo_execute(Is, X, Result).
 
-/*
- * fine predicati utils
-*/
 
+estrai_valore([(Chiave, Valore) | _], [Field], [Risultato]) :-
+    string(Field),
+    string(Chiave),
+    Field = Chiave,
+    !,
+    Valore = Risultato.
 
-
-%una cosa da vedere è come rendere la scrittura
-%jsonobj([("nome", "pippo"), ("cognome", "paperino")])
-%in
-%[("nome", "pippo"), ("cognome", "paperino")].
-%Per farlo faccio:
-%
-%
-% jsonobj([("nome", "pippo"), ("cognome", "paperino")]) =.. [jsonobj,X], last(X, ObjectArray).
-
-% Caso in cui il campo Field è un numero.
-% search_couple restituisce l'n-esimo elemento della lista (una coppia Key:Value).
-
-
-jsonaccess(Object, [], Object) :- !.
-/*
-jsonaccess(ObjectList, N, Risultato) :-
-    number(N),
-    search_couple(ObjectList, N, Coppia),
-    dai_valore(Coppia, Risultato).
-*/
-
-jsonlist(Object,  ObjectList) :-
-    Object =.. [jsonobj | Intermedio],
-    Intermedio = [ObjectList | []].
-
-% estrai_valore estrae il valore dalla coppia (Key, Value)
-estrai_valore([(Chiave, _) | AltreCoppie], Field, Valore) :-
+estrai_valore([(Chiave, _) | _], [Field], fail) :-
+    string(Field),
     string(Chiave),
     Field \= Chiave,
-    estrai_valore(AltreCoppie, Field, Valore).
+    !.
 
-estrai_valore([], _, _) :- fail.
-estrai_valore([(Chiave, Valore) | _], Chiave, Valore).
+estrai_valore([(_, _) | _], [Field], fail) :-
+    number(Field), !.
 
-jsonaccess(Object, [Field | Fields], Risultato) :-
-    jsonlist(Object, ObjectList),
-    estrai_valore(ObjectList, Field, Valore),
-    cerca_in_array(Array, Fields, Risultato).
-
-% cerca_in_array pesca l'N-esimo elemento di un array se Field è un
-% numero.
-cerca_in_array(Array, Fields, Risultato) :-
-    Fields = [N | []],
-    number(N),
-    !,
-    elemento_i_esimo(Array, N, Risultato).
+suddividi_field(Stringa, PrimoField, SecondoField) :-
+    string_codes(Stringa, ListaCodici),
+    split_codice(ListaCodici, 44, PrimoCodice, SecondoCodice),
+    string_codes(PrimoField, PrimoCodice),
+    string_codes(SecondoField, SecondoCodice),
+    !.
 
 
-%predicato che capisce che Input è una array
-is_lista(Input, true).
+split_codice([X | Xs], T, [X | L1], L2) :-
+               X\=T, split_codice(Xs, T, L1, L2), !.
+
+split_codice([T | Xs], T, [], Xs).
 
 
-%  jsonobj([(”nome”, ”Arthur”), (”cognome”, jsonarray[1, 2, 3])])
-%  ObjectList = [(”nome”, ”Arthur”), (”cognome”, jsonarray[1, 2, 3])]
-%  Fields = ["cognome", 1].
-
+%FINE PREDICATI UTILS
