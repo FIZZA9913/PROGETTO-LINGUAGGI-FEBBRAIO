@@ -27,7 +27,8 @@ jsonparse(JSONString, Object) :-
     nonvar(JSONString),
     nonvar(Object),
     !,
-    jsonparse(JSONString, Object).
+    jsonparse(JSONString, Object1),
+    Object1 = Object.
 
 jsonparse(JSONString, Object) :-
     var(JSONString),
@@ -62,8 +63,6 @@ riconosci_e_traduci_execute([C | Cs], Result) :-
     whitespace(Codes_o_left, []).
 
 riconosci_e_traduci_execute([C | Cs], Result) :-
-    C = 91,
-    !,
     array([C | Cs], Result, Codes_a_left),
     whitespace(Codes_a_left, []).
 
@@ -139,12 +138,11 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     whitespace(Cs, Codes_w_left),
     object_execute(Codes_w_left, Result, Members, Temp, o1, Codes_left).
 
-object_execute([C | Cs], Result, Members, _Temp, Q, Codes_left) :-
+object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
     Q = o1,
     C = 125,
     !,
-    Result =.. [jsonobj, Members],
-    Codes_left = Cs.
+    Result =.. [jsonobj, Members].
 
 object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o1,
@@ -168,12 +166,11 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     append(Members, [Term], Members1),
     object_execute(Codes_v_left, Result, Members1, '', o3, Codes_left).
 
-object_execute([C | Cs], Result, Members, _Temp, Q, Codes_left) :-
+object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
     Q = o3,
     C = 125,
     !,
-    Result =.. [jsonobj, Members],
-    Codes_left = Cs.
+    Result =.. [jsonobj, Members].
 
 object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o3,
@@ -205,12 +202,11 @@ array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     whitespace(Cs, Codes_w_left),
     array_execute(Codes_w_left, Result, Elements, a1, Codes_left).
 
-array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
+array_execute([C | Cs], Result, Elements, Q, Cs) :-
     Q = a1,
     C = 93,
     !,
-    Result =.. [jsonarray, Elements],
-    Codes_left = Cs.
+    Result =.. [jsonarray, Elements].
 
 array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     Q = a1,
@@ -220,12 +216,11 @@ array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     append(Elements, [Result_value], Elements1),
     array_execute(Codes_v_left, Result, Elements1, a2, Codes_left).
 
-array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
+array_execute([C | Cs], Result, Elements, Q, Cs) :-
     Q = a2,
     C = 93,
     !,
-    Result =.. [jsonarray, Elements],
-    Codes_left = Cs.
+    Result =.. [jsonarray, Elements].
 
 array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     Q = a2,
@@ -252,10 +247,7 @@ whitespace([C | Cs], Codes_left) :-
     !,
     whitespace(Cs, Codes_left).
 
-whitespace([C | Cs], Codes_left) :-
-    not(whitespace_acceptable(C)),
-    !,
-    Codes_left = [C | Cs].
+whitespace([C | Cs], [C | Cs]).
 
 whitespace_acceptable(32). %spazio
 whitespace_acceptable(10). %\n
@@ -271,20 +263,11 @@ whitespace_acceptable(9).  %\t
  * elementari true, false e null
 */
 
-true([A, B, C, D | Cs], Result, Codes_left) :-
-    atom_codes('true', [A, B, C, D]),
-    Result = true,
-    Codes_left = Cs.
+true([116, 114, 117, 101 | Cs], true, Cs).
 
-false([A, B, C, D, E | Cs], Result, Codes_left) :-
-    atom_codes('false', [A, B, C, D, E]),
-    Result = false,
-    Codes_left = Cs.
+false([102, 97, 108, 115, 101 | Cs], false, Cs).
 
-null([A, B, C, D | Cs], Result, Codes_left) :-
-    atom_codes('null', [A, B, C, D]),
-    Result = null,
-    Codes_left = Cs.
+null([110, 117, 108, 108 | Cs], null, Cs).
 
 /*
  * fine predicati per riconoscimento valori elementari
@@ -297,11 +280,10 @@ null([A, B, C, D | Cs], Result, Codes_left) :-
 numero(Codes_in, Result, Codes_left) :-
     numero_execute(Codes_in, Result, '', Codes_left).
 
-numero_execute([], Result, Temp, Codes_left) :-
+numero_execute([], Result, Temp, []) :-
     atom_to_term(Temp, Term, _),
     number(Term),
-    Result = Term,
-    Codes_left = [].
+    Result = Term.
 
 numero_execute([C | Cs], Result, Temp, Codes_left) :-
     number_acceptable(C),
@@ -310,22 +292,20 @@ numero_execute([C | Cs], Result, Temp, Codes_left) :-
     atom_concat(Temp, Atom, Temp1),
     numero_execute(Cs, Result, Temp1, Codes_left).
 
-numero_execute([C | Cs], Result, Temp, Codes_left) :-
-    not(number_acceptable(C)),
-    !,
+numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
     atom_to_term(Temp, Term, _),
     number(Term),
-    Result = Term,
-    Codes_left = [C | Cs].
+    Result = Term.
 
+number_acceptable(Code) :-
+    Code >= 48,
+    Code =< 57,
+    !.
 number_acceptable(43).  %+
 number_acceptable(45).  %-
 number_acceptable(46).  %.
 number_acceptable(69).  %E
 number_acceptable(101). %e
-number_acceptable(Code) :-
-    Code >= 48,
-    Code =< 57.
 
 /*
  * fine predicato per riconoscimento numeri
@@ -353,15 +333,14 @@ stringa_execute([C | Cs], Result, Temp, Q, Codes_left) :-
     atom_concat(Temp, Atom, Temp1),
     stringa_execute(Cs, Result, Temp1, s1, Codes_left).
 
-stringa_execute([C | Cs], Result, Temp, Q, Codes_left) :-
+stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
     Q = s1,
     C = 34,
     !,
     atom_concat(Temp, '"', Temp1),
     atom_to_term(Temp1, Term, _),
     string(Term),
-    Result = Term,
-    Codes_left = Cs.
+    Result = Term.
 
 /*
  * fine predicato per riconoscimento stringhe
@@ -378,7 +357,9 @@ jsonobj(Members, Trad_in, Trad_out) :-
 
 jsonobj_execute([P | Ps], Trad_in, Trad_out) :-
     traduzione_pair(P, Trad_in, Temp),
-    jsonobj_execute(Ps, Temp, Trad_out).
+    verifica_virgola([P | Ps], Virgola),
+    atom_concat(Temp, Virgola, Temp1),
+    jsonobj_execute(Ps, Temp1, Trad_out).
 
 jsonobj_execute([], Trad_in, Trad_out) :-
     atom_concat(Trad_in, '}', Trad_out).
@@ -400,15 +381,6 @@ jsonarray_execute([E | Es], Trad_in, Trad_out) :-
     caso_base(E),
     !,
     term_to_atom(E, Atom),
-    verifica_virgola([E | Es], Virgola),
-    atom_concat(Trad_in, Atom, Temp),
-    atom_concat(Temp, Virgola, Temp1),
-    jsonarray_execute(Es, Temp1, Trad_out).
-
-jsonarray_execute([E | Es], Trad_in, Trad_out) :-
-    string(E),
-    !,
-    atom_string(Atom, E),
     verifica_virgola([E | Es], Virgola),
     atom_concat(Trad_in, Atom, Temp),
     atom_concat(Temp, Virgola, Temp1),
@@ -441,9 +413,8 @@ jsonarray_execute([], Trad_in, Trad_out) :-
 
 traduzione_pair((Key, Value), Trad_in, Trad_out) :-
     atom(Trad_in),
-    term_string(Key, Stringa),
-    string(Stringa),
-    atom_string(Atom, Stringa),
+    string(Key),
+    term_to_atom(Key, Atom),
     atom_concat(Trad_in, Atom, Temp),
     atom_concat(Temp, ' : ', Temp1),
     traduzione_pair_value(Value, Temp1, Trad_out).
@@ -452,12 +423,6 @@ traduzione_pair_value(Value, Trad_in, Trad_out) :-
     caso_base(Value),
     !,
     term_to_atom(Value, Atom),
-    atom_concat(Trad_in, Atom, Trad_out).
-
-traduzione_pair_value(Value, Trad_in, Trad_out) :-
-    string(Value),
-    !,
-    atom_string(Atom, Value),
     atom_concat(Trad_in, Atom, Trad_out).
 
 traduzione_pair_value(Value, Trad_in, Trad_out) :-
@@ -480,7 +445,6 @@ traduzione_pair_value(Value, Trad_in, Trad_out) :-
 */
 
 jsondump(JSON, FileName) :-
-    compound(JSON),
     atomo_o_stringa(FileName),
     jsonparse(JSONString, JSON),
     atom_string(JSONString, Stringa),
@@ -507,6 +471,28 @@ jsonread(FileName, JSON) :-
 */
 
 /*
+ * inizio predicato elemento_i_esimo per
+ * estrarre un valore a un dato indice di
+ * una lista
+*/
+
+elemento_i_esimo(List, Index, Result) :-
+    number(Index),
+    elemento_i_esimo_execute(List, Index, Result).
+
+elemento_i_esimo_execute([_ | Is], Index, Result) :-
+    Index > 0,
+    !,
+    X is Index - 1,
+    elemento_i_esimo_execute(Is, X, Result).
+
+elemento_i_esimo_execute([I | _], 0, I).
+
+/*
+ * fine predicato elemento_i_esimo
+*/
+
+/*
  * inizio predicati utils
 */
 
@@ -525,44 +511,19 @@ valore_base(null).
 %fine
 %inizio
 
-verifica_virgola([_ | Xs], Result) :-
-    Xs = [],
-    !,
-    Result = ''.
-
-verifica_virgola([_ | Xs], Result) :-
-    Xs \= [],
-    !,
-    Result = ', '.
-
-%fine
-%inizio
-
-elemento_i_esimo(List, Index, Result) :-
-    number(Index),
-    elemento_i_esimo_execute(List, Index, Result).
-
-elemento_i_esimo_execute([I | _], Index, Result) :-
-    Index = 0,
-    !,
-    Result = I.
-
-elemento_i_esimo_execute([_ | Is], Index, Result) :-
-    Index > 0,
-    !,
-    X is Index - 1,
-    elemento_i_esimo_execute(Is, X, Result).
+verifica_virgola([_ | [_ | _]], ', ').
+verifica_virgola([_ | []], '').
 
 %fine
 %inizio
 
 caso_base(X) :-
-    valore_base(X),
-    !.
+    not(caso_base_execute(X)).
 
-caso_base(X) :-
-    number(X),
-    !.
+caso_base_execute(X) :-
+    not(valore_base(X)),
+    not(string(X)),
+    not(number(X)).
 
 %fine
 %inizio
@@ -570,7 +531,6 @@ caso_base(X) :-
 atomo_o_stringa(X) :-
     atom(X),
     !.
-
 atomo_o_stringa(X) :-
     string(X),
     !.
