@@ -184,34 +184,14 @@ viene presa la prima coppia dell'oggetto json e comparata la chiave di quest'ult
 da estrai_valore il risultato (corrispondente al valore della coppia (Attributo, Valore)), altrimenti viene cercata ricorsivamente la coppia per la quale l'unificazione
 è valida.
 Se tale coppia non esiste all'interno dell'oggetto json, allora viene restituito false.
+
 [QUESTA PARTE E' DA VERIFICARE CON UN E-MAIL AL PROF]
 Una volta ottenuto il Risultato, si verifica se questi sia un atomo o un dato composto: nel caso in cui sia un atomo, il Risultato viene restituito così come dal predicato
 estrai_valore; altrimenti, viene fatta una ricorsione sul dato composto richiamando ricorsivamente jsonaccess.
 In quest'ultima istanza, la variabile Field contiene più di una chiave all'interno della stringa.
 Per dividere i vari elementi appartenenti alla stringa Field viene usato il predicato suddividi_field.
+[ANCORA IN ATTESA MA PROBABILE ELIMINAZIONE DI QUESTA PARTE DI TESTO]
 
-
-/*
-* suddividi_field
-*/
-
-Suddividi_field prende in ingresso una stringa e ritorna due risultati: il primo rappresenta la prima chiave all'interno della stringa; l'altro risultato è il resto della
-stringa. Questa divisione viene svolta da un predicato chiamato split_codice che verrà presentato tra poco.
- Prima di eseguire questa suddivisione è importante però riscrivere la stringa come lista di codici, operazione possibile attraverso il predicato string_codes
- interno a Prolog. 
-Una volta che tale lista di codici sarà divisa in due parti dal predicato split_codice, verranno restituite, sottoforma di stringa, la prima e la seconda chiave chiamate
-PrimoField e SecondoField.
-
-/*
-* split_codice
-*/
-
-Questo predicato riceve in input una lista di codici ed un carattere attraverso il quale decidere in che punto tagliare la stringa, restituendo due risultati: una prima
-stringa che precede il carattere ed una seconda stringa che segue il carattere.
-Questa operazione viene svolta in modo ricorsivo andando a cercare all'interno della lista di caratteri, il codice che identifica sia la testa della lista che il carattere
-dato in input.
-Quando il carattere viene raggiunto, questo viene eliminato dalla stringa originale dividendola in due parti, stringa pre-carattere e stringa post-carattere.
-Questi due risultati vengono poi passati al predicato suddividi_field.
 
 /*
 * valore_base
