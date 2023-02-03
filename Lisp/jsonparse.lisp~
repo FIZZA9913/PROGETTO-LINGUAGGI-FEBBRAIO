@@ -1,0 +1,12 @@
+; prova - Hello, World!
+(defun print-hello() "Hello, World!")
+
+; prova - numero-pari
+(defun numero-pari ()
+  (cond ((t (print "pari"))
+        (t (print "dispari")))))
+
+; prova - funzione che calcola il resto
+;(defun resto(num den)
+;    cond (((< num den) num)
+;        (T resto((- num den) den))))

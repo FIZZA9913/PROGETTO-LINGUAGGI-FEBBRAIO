@@ -1,0 +1,6 @@
+;;;; jsonparse.pl
+;;;;
+;;;; Gruppo formato da:
+;;;; Fizzardi, Fabio, 844726
+;;;; Pascone, Michele, 820633
+;;;; Paulicelli, Sabino, 856111
