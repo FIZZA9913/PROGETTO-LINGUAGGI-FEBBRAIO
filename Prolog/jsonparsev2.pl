@@ -14,7 +14,7 @@ contenuto di Field (lista, stringa o numero) restituisce un risultato.
 
 
 jsonaccess(jsonarray(_), [], jsonarray(_)).
-jsonaccess(jsonarray(Elements), Field, Risultato) :- elemento_i_esimo(Elements, Field, Risultato).
+jsonaccess(jsonarray(Elements), Field, Risultato) :- elemento_i_esimo(jsonarray(Elements), Field, Risultato).
 
 
 /*
