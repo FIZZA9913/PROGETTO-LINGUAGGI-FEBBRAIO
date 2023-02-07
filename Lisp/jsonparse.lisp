@@ -26,15 +26,31 @@
                 (format out "~S" e))
                 '((1 . A) (2 . B) (42 . QD) (3 . D)))))
 
-;; FIXME: SBAGLIATO, questa roba deve farla jsonparse
+;; SCRIVERE UNA STRINGA SU FILE (FORSE)
+;(defun write-file (string outfile &key (action-if-exists :error))
+;   (check-type action-if-exists (member nil :error :new-version :rename :rename-and-delete 
+;                                        :overwrite :append :supersede))
+;   (with-open-file (outstream outfile :direction :output :if-exists action-if-exists)
+;     (write-sequence string outstream)))
+
 (defun jsonread (filename)
+    "Return a string from file filename"
     (with-open-file (in filename
                         :direction :input
                         :if-does-not-exist :error)
-        (let ((charlist (stream-to-char-list in)))
+        (let ((string (make-string (file-length in))))
+            (read-sequence string in)
+            (jsonparse string))))
+
+(defun jsonparse (input-string)
+        (let ((charlist (string-to-char-list input-string)))
             (cond ((char-equal (first charlist) #\{) (print "Parse an object"))
                   ((char-equal (first charlist) #\[) (print "Parse an array"))
-                  (t (print "Syntax error in the JSON file."))))))
+                  (t (print "Syntax error in the JSON file.")))))
+
+(defun string-to-char-list (s)
+    (assert (stringp s) (s) "string-to-char-list input error: not a valid string")
+    (coerce s 'list))
 
 (defun stream-to-char-list (in)
     "Return a list of all characters in the stream"
