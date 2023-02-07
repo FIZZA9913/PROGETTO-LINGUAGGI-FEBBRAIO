@@ -4,3 +4,41 @@
 ;;;; Fizzardi, Fabio, 844726
 ;;;; Pascone, Michele, 820633
 ;;;; Paulicelli, Sabino, 856111
+
+;;; jsonparse: prende un file trasformato in stringa e la analizza char per char. SCRIVERE anche jsonread e jsondump: legge da un file e return una stringa
+;;; parser object: viene chiamato quando incontriamo una {
+;;; parser array: chiamato quando incontriamo una [
+;;; parser string: quando incontriamo "
+
+;;; altri parser non ricorsivi...
+
+;;; jsonparse restituisce una lista, che puo' essere data in pasto a jsonaccess per produrre il singolo valore cercato. ATTENZIONE: La chiave cercata deve essere cercata ricorsivamente negli oggetti o array interni
+
+;;; error: stampa una stringa contenente l'errore, se possibile con il dettaglio o la riga dell'errore. FORSE ESISTE IN LISP
+
+;; FIXME: jsondump scrive una lista Lisp, deve scrivere un oggetto in sintassi JSON.
+(defun jsondump (JSON filename)
+    (with-open-file (out filename
+                         :direction :output
+                         :if-exists :supersede
+                         :if-does-not-exist :create)
+        (mapcar (lambda (e)
+                (format out "~S" e))
+                '((1 . A) (2 . B) (42 . QD) (3 . D)))))
+
+;; FIXME: per adesso la funzione jsonread richiama read-list-from, che legge solo liste Lisp.
+;;       Deve invece invocare jsonparse, che legge char per char.
+(defun jsonread (filename)
+    (with-open-file (in filename
+                        :direction :input
+                        :if-does-not-exist :error)
+        (string-to-char-list in)))
+
+(defun read-list-from (input-stream)
+    (let ((e (read input-stream nil 'eof)))
+        (unless (eq e 'eof)
+          (cons e (read-list-from input-stream)))))
+
+(defun string-to-char-list (input-stream)
+; (let ((s (make-string-input-stream (format nil "line")))) (read-char s))
+    (setf text (mapcar 'string (coerce (string (input-stream)) 'list))))

@@ -12,7 +12,28 @@
 
 ;;; altri parser non ricorsivi...
 
-;;; jsonparse restituisce una lista, che può essere data in pasto a jsonaccess per produrre il singolo valore cercato. ATTENZIONE: La chiave cercata deve essere cercata ricorsivamente negli oggetti o array interni
+;;; jsonparse restituisce una lista, che puo' essere data in pasto a jsonaccess per produrre il singolo valore cercato. ATTENZIONE: La chiave cercata deve essere cercata ricorsivamente negli oggetti o array interni
 
-;;; error: stampa una stringa contenente l'errore, se si può con il dettaglio o la riga dell'errore. FORSE ESISTE IN LISP
+;;; error: stampa una stringa contenente l'errore, se possibile con il dettaglio o la riga dell'errore. FORSE ESISTE IN LISP
 
+;; FIXME: jsondump scrive una lista Lisp, deve scrivere un oggetto in sintassi JSON.
+(defun jsondump (JSON filename)
+    (with-open-file (out filename
+                         :direction :output
+                         :if-exists :supersede
+                         :if-does-not-exist :create)
+        (mapcar (lambda (e)
+                (format out "~S" e))
+                '((1 . A) (2 . B) (42 . QD) (3 . D)))))
+
+(defun jsonread (filename)
+    (with-open-file (in filename
+                        :direction :input
+                        :if-does-not-exist :error)
+        (stream-to-char-list in)))
+
+(defun stream-to-char-list (in)
+    "Return a list of all characters in the stream"
+    (let ((c (read-char in nil 'eof)))
+        (unless (eq c 'eof)
+            (cons c (string-to-char-list in)))))
