@@ -48,8 +48,9 @@
                   ((char-equal (first charlist) #\[) (print "Parse an array"))
                   (t (print "Syntax error in the JSON file.")))))
 
-(defun string-to-char-list (s)
-    (assert (stringp s) (s) "string-to-char-list input error: not a valid string")
+(defun string-to-char-list (input-string)
+    "Return a list of all characters in the string"
+    (assert (stringp input-string) (input-string) "string-to-char-list input error: not a valid string")
     (coerce s 'list))
 
 (defun stream-to-char-list (in)
