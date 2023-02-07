@@ -26,14 +26,18 @@
                 (format out "~S" e))
                 '((1 . A) (2 . B) (42 . QD) (3 . D)))))
 
+;; FIXME: SBAGLIATO, questa roba deve farla jsonparse
 (defun jsonread (filename)
     (with-open-file (in filename
                         :direction :input
                         :if-does-not-exist :error)
-        (stream-to-char-list in)))
+        (let ((charlist (stream-to-char-list in)))
+            (cond ((char-equal (first charlist) #\{) (print "Parse an object"))
+                  ((char-equal (first charlist) #\[) (print "Parse an array"))
+                  (t (print "Syntax error in the JSON file."))))))
 
 (defun stream-to-char-list (in)
     "Return a list of all characters in the stream"
     (let ((c (read-char in nil 'eof)))
         (unless (eq c 'eof)
-            (cons c (string-to-char-list in)))))
+            (cons c (stream-to-char-list in)))))

@@ -26,19 +26,15 @@
                 (format out "~S" e))
                 '((1 . A) (2 . B) (42 . QD) (3 . D)))))
 
-;; FIXME: per adesso la funzione jsonread richiama read-list-from, che legge solo liste Lisp.
-;;       Deve invece invocare jsonparse, che legge char per char.
 (defun jsonread (filename)
     (with-open-file (in filename
                         :direction :input
                         :if-does-not-exist :error)
-        (string-to-char-list in)))
+        (let ((charlist (stream-to-char-list in)))
+            charlist)))
 
-(defun read-list-from (input-stream)
-    (let ((e (read input-stream nil 'eof)))
-        (unless (eq e 'eof)
-          (cons e (read-list-from input-stream)))))
-
-(defun string-to-char-list (input-stream)
-; (let ((s (make-string-input-stream (format nil "line")))) (read-char s))
-    (setf text (mapcar 'string (coerce (string (input-stream)) 'list))))
+(defun stream-to-char-list (in)
+    "Return a list of all characters in the stream"
+    (let ((c (read-char in nil 'eof)))
+        (unless (eq c 'eof)
+            (cons c (string-to-char-list in)))))
