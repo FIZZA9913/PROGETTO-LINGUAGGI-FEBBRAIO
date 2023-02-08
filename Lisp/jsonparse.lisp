@@ -43,12 +43,12 @@
             (jsonparse string))))
 
 (defun jsonparse (input-string)
-    "Parse a string starting with { or [ or syntax error, returns the return value of parseobject or parsearray"
+    "Parse a string starting with { or [ or syntax error, returns the return value of parseobj or parsearray"
     (let ((charlist (string-to-char-list input-string)))
         (cond ((char-equal (first charlist) #\{)
-               (print "Parse an object"))
+               (parseobj (rest charlist)))
               ((char-equal (first charlist) #\[)
-               (print "Parse an array"))
+               (parsearray (rest charlist)))
               (t (print "Syntax error in the JSON file.")))))
 
 ;; potrebbe diventare una lambda, forse verrà usata solo da jsonparse
@@ -63,3 +63,22 @@
     (let ((c (read-char in nil 'eof)))
         (unless (eq c 'eof)
             (cons c (stream-to-char-list in)))))
+
+(defun parseobj (charlist &optional partial-result)
+    (cond ((char= #\} (first charlist)) (cons 'jsonobj (rest charlist)))
+          ((char= #\" (first charlist)) (parseobj (parsemembers charlist)))
+          (t (parseobj (parsews charlist)))))
+
+(defun parsearray (charlist)
+    (cons 'jsonarray charlist))
+
+(defun parsemembers (charlist)
+    "Returns the rest of the parsed list and a list of members as partial result")
+
+(defun parsews (charlist)
+    (cond ((or
+            (char= #\Space (first charlist))
+            (char= #\Tab (first charlist))
+            (char= #\Return (first charlist))
+            (char= #\Newline (first charlist))) (rest charlist))
+          (t charlist)))
