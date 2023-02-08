@@ -68,32 +68,27 @@
 ;    (reverse (cdr (reverse inputlist))))
 
 (defun parseobj (charlist &optional partialresult)
-    (cond ((char= #\} (first charlist)) (cons 'jsonobj (rest charlist)))
-          ((char= #\" (first charlist)) (parseobj (parsemembers charlist)))
-          (t (parseobj (parsews charlist)))))
+    (let ((stcharlist (parsews charlist)))
+         (cond ((char= #\} (first stcharlist)) (cons 'jsonobj (rest stcharlist)))
+               ((char= #\" (first stcharlist)) (parseobj (parsemembers stcharlist)))
+               (t (print "Syntax Error")))))
 
 (defun parsearray (charlist &optional partialresult)
-    (cond ((char= #\] (first charlist)) (cons 'jsonarray (rest charlist)))
-          ((or
-            (char= #\{ (first charlist))
-            (char= #\[ (first charlist))
-            (char= #\" (first charlist))
-            (char= #\0 (first charlist)) ;FIXME: non solo il numero zero ma un number
-            (char= #\t (first charlist))
-            (char= #\f (first charlist))
-            (char= #\n (first charlist))) (parsearray (parseelements charlist)))
-          (t (parsearray (parsews charlist)))))
+    (let ((stcharlist (parsews charlist)))
+         (cond ((char= #\] (first stcharlist)) (cons 'jsonarray (rest stcharlist)))
+               (t (parsearray (parseelements stcharlist))))))
 
-(defun parsemembers (charlist)
+(defun parsemembers (charlist &optional partialresult)
     "Returns the rest of the parsed list and a list of members as partial result")
 
 (defun parsews (charlist)
-    (cond ((or
+    "Erase the first sequence of blank chars from charlist"
+    (cond ((null (first charlist)) charlist)
+           ((or
             (char= #\Space (first charlist))
             (char= #\Tab (first charlist))
-            (char= #\Return (first charlist))
-            (char= #\Newline (first charlist))) (rest charlist))
-          (t (print "SYN ERROR"))))
+            (char= #\Newline (first charlist))) (parsews (rest charlist)))
+          (t charlist)))
 
 (defun parseelements (charlist &optional partialresult)
     "Returns the rest of the parsed list and a list of elements as partial result")
