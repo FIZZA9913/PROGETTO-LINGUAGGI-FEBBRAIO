@@ -91,4 +91,13 @@
           (t charlist)))
 
 (defun parseelements (charlist &optional partialresult)
-    "Returns the rest of the parsed list and a list of elements as partial result")
+    "Returns the rest of the parsed list and a list of elements as partial result"
+    (let (stcharlist (parsews charlist))
+         (cond ()
+               ()
+               ()
+               ()
+               ()
+               ()
+               ())
+      ))
