@@ -43,16 +43,21 @@
             (jsonparse string))))
 
 (defun jsonparse (input-string)
-        (let ((charlist (string-to-char-list input-string)))
-            (cond ((char-equal (first charlist) #\{) (print "Parse an object"))
-                  ((char-equal (first charlist) #\[) (print "Parse an array"))
-                  (t (print "Syntax error in the JSON file.")))))
+    "Parse a string starting with { or [ or syntax error, returns the return value of parseobject or parsearray"
+    (let ((charlist (string-to-char-list input-string)))
+        (cond ((char-equal (first charlist) #\{)
+               (print "Parse an object"))
+              ((char-equal (first charlist) #\[)
+               (print "Parse an array"))
+              (t (print "Syntax error in the JSON file.")))))
 
+;; potrebbe diventare una lambda, forse verrà usata solo da jsonparse
 (defun string-to-char-list (input-string)
     "Return a list of all characters in the string"
     (assert (stringp input-string) (input-string) "string-to-char-list input error: not a valid string")
-    (coerce s 'list))
+    (coerce input-string 'list))
 
+;; probabilmente non serve
 (defun stream-to-char-list (in)
     "Return a list of all characters in the stream"
     (let ((c (read-char in nil 'eof)))
