@@ -90,14 +90,14 @@
             (char= #\Newline (first charlist))) (parsews (rest charlist)))
           (t charlist)))
 
-(defun parseelements (charlist &optional partialresult)
+(defun parseelements (charlist &optional partialresult) ; INCOMPLETE
     "Returns the rest of the parsed list and a list of elements as partial result"
     (let (stcharlist (parsews charlist))
-         (cond ()
-               ()
-               ()
-               ()
-               ()
-               ()
-               ())
+         (cond ((char= #\{ (first stcharlist)) (parseobj stcharlist))
+               ((char= #\[ (first stcharlist)) (parsearray stcharlist))
+               ((char= #\" (first stcharlist)) (parsestring stcharlist))
+               ((char= #\0 (first stcharlist)) (parsenumber stcharlist)) ;FIXME: this finds only 0 as number
+               ((char= #\t (first stcharlist)) (parsebool stcharlist))
+               ((char= #\f (first stcharlist)) (parsebool stcharlist))
+               ((char= #\{ (first stcharlist)) (parsebool stcharlist)))
       ))
