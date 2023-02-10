@@ -105,5 +105,5 @@
                ((char= #\0 (first stcharlist)) (parsenumber stcharlist)) ;FIXME: this finds only 0 as number
                ((char= #\t (first stcharlist)) (parsebool stcharlist))
                ((char= #\f (first stcharlist)) (parsebool stcharlist))
-               ((char= #\n (first stcharlist)) (parsebool stcharlist)))
+               ((char= #\{ (first stcharlist)) (parsebool stcharlist)))
       ))
