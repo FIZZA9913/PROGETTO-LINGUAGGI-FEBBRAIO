@@ -16,6 +16,12 @@
 
 ;;; error: stampa una stringa contenente l'errore, se possibile con il dettaglio o la riga dell'errore. FORSE ESISTE IN LISP
 
+;;; PROVA FUNZIONE CON OPTIONAL PARAMETER
+(defun fatt (num &optional (acc 1))
+    (cond ((< num 2) acc)
+          (t (fatt (- num 1) (* acc num)))))
+;;;-----------------------------------------
+
 ;; FIXME: jsondump scrive una lista Lisp, deve scrivere un oggetto in sintassi JSON.
 (defun jsondump (JSON filename)
     (with-open-file (out filename
