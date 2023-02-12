@@ -25,7 +25,7 @@ jsonparse(JSONString, Object) :-
 
 jsonparse(JSONString, Object) :-
     nonvar(JSONString),
-    nonvar(Object),
+    compound(Object),
     !,
     jsonparse(JSONString, Object1),
     Object1 = Object.
@@ -54,17 +54,16 @@ jsonparse(JSONString, Object) :-
 
 riconosci_e_traduci(Code_list, Result) :-
     whitespace(Code_list, Codes_w_left),
-    riconosci_e_traduci_execute(Codes_w_left, Result).
+    riconosci_e_traduci_execute(Codes_w_left, Result, Codes_left),
+    whitespace(Codes_left, []).
 
-riconosci_e_traduci_execute([C | Cs], Result) :-
+riconosci_e_traduci_execute([C | Cs], Result, Codes_o_left) :-
     C = 123,
     !,
-    object([C | Cs], Result, Codes_o_left),
-    whitespace(Codes_o_left, []).
+    object([C | Cs], Result, Codes_o_left).
 
-riconosci_e_traduci_execute([C | Cs], Result) :-
-    array([C | Cs], Result, Codes_a_left),
-    whitespace(Codes_a_left, []).
+riconosci_e_traduci_execute([C | Cs], Result, Codes_a_left) :-
+    array([C | Cs], Result, Codes_a_left).
 
 /*
  * fine predicato riconosci_e_traduci
@@ -77,47 +76,41 @@ riconosci_e_traduci_execute([C | Cs], Result) :-
 
 value(Codes_in, Result, Codes_left) :-
     whitespace(Codes_in, Codes_w_left),
-    value_execute(Codes_w_left, Result, Codes_left).
+    value_execute(Codes_w_left, Result, Codes_left_a),
+    whitespace(Codes_left_a, Codes_left).
 
-value_execute([C | Cs], Result, Codes_left) :-
+value_execute([C | Cs], Result, Codes_o_left) :-
     C = 123,
     !,
-    object([C | Cs], Result, Codes_o_left),
-    whitespace(Codes_o_left, Codes_left).
+    object([C | Cs], Result, Codes_o_left).
 
-value_execute([C | Cs], Result, Codes_left) :-
+value_execute([C | Cs], Result, Codes_a_left) :-
     C = 91,
     !,
-    array([C | Cs], Result, Codes_a_left),
-    whitespace(Codes_a_left, Codes_left).
+    array([C | Cs], Result, Codes_a_left).
 
-value_execute([C | Cs], Result, Codes_left) :-
+value_execute([C | Cs], Result, Codes_t_left) :-
     C = 116,
     !,
-    true([C | Cs], Result, Codes_t_left),
-    whitespace(Codes_t_left, Codes_left).
+    true([C | Cs], Result, Codes_t_left).
 
-value_execute([C | Cs], Result, Codes_left) :-
+value_execute([C | Cs], Result, Codes_f_left) :-
     C = 102,
     !,
-    false([C | Cs], Result, Codes_f_left),
-    whitespace(Codes_f_left, Codes_left).
+    false([C | Cs], Result, Codes_f_left).
 
-value_execute([C | Cs], Result, Codes_left) :-
+value_execute([C | Cs], Result, Codes_n_left) :-
     C = 110,
     !,
-    null([C | Cs], Result, Codes_n_left),
-    whitespace(Codes_n_left, Codes_left).
+    null([C | Cs], Result, Codes_n_left).
 
-value_execute([C | Cs], Result, Codes_left) :-
+value_execute([C | Cs], Result, Codes_s_left) :-
     C = 34,
     !,
-    stringa([C | Cs], Result, Codes_s_left),
-    whitespace(Codes_s_left, Codes_left).
+    stringa([C | Cs], Result, Codes_s_left).
 
-value_execute(Codes_in, Result, Codes_left) :-
-    numero(Codes_in, Result, Codes_nu_left),
-    whitespace(Codes_nu_left, Codes_left).
+value_execute(Codes_in, Result, Codes_nu_left) :-
+    numero(Codes_in, Result, Codes_nu_left).
 
 /*
  * fine predicato value
@@ -129,7 +122,7 @@ value_execute(Codes_in, Result, Codes_left) :-
 */
 
 object(Codes_in, Result, Codes_left) :-
-    object_execute(Codes_in, Result, [], '', o0, Codes_left).
+    object_execute(Codes_in, Result, [], [], o0, Codes_left).
 
 object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o0,
@@ -138,39 +131,23 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     whitespace(Cs, Codes_w_left),
     object_execute(Codes_w_left, Result, Members, Temp, o1, Codes_left).
 
-object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
-    Q = o1,
-    C = 125,
-    !,
-    Result =.. [jsonobj, Members].
-
 object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o1,
     C \= 125,
     !,
     stringa([C | Cs], Result_stringa, Codes_s_left),
-    term_to_atom(Result_stringa, Atom),
-    atom_concat(Temp, Atom, Temp1),
+    append(Temp, [Result_stringa], Temp1),
     whitespace(Codes_s_left, Codes_w_left),
     object_execute(Codes_w_left, Result, Members, Temp1, o2, Codes_left).
 
-object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
+object_execute([C | Cs], Result, Members, [S | []], Q, Codes_left) :-
     Q = o2,
     C = 58,
     !,
-    atom_concat(Temp, ',', Temp1),
     value(Cs, Result_value, Codes_v_left),
-    term_to_atom(Result_value, Atom),
-    atom_concat(Temp1, Atom, Temp2),
-    atom_to_term(Temp2, Term, _),
-    append(Members, [Term], Members1),
-    object_execute(Codes_v_left, Result, Members1, '', o3, Codes_left).
-
-object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
-    Q = o3,
-    C = 125,
-    !,
-    Result =.. [jsonobj, Members].
+    Pair = (S, Result_value),
+    append(Members, [Pair], Members1),
+    object_execute(Codes_v_left, Result, Members1, [], o3, Codes_left).
 
 object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o3,
@@ -178,10 +155,15 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     !,
     whitespace(Cs, Codes_w_left),
     stringa(Codes_w_left, Result_stringa, Codes_s_left),
-    term_to_atom(Result_stringa, Atom),
-    atom_concat(Temp, Atom, Temp1),
+    append(Temp, [Result_stringa], Temp1),
     whitespace(Codes_s_left, Codes_w1_left),
     object_execute(Codes_w1_left, Result, Members, Temp1, o2, Codes_left).
+
+object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
+    final_state_obj(Q),
+    C = 125,
+    !,
+    Result =.. [jsonobj, Members].
 
 /*
  * fine predicato object
@@ -202,12 +184,6 @@ array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     whitespace(Cs, Codes_w_left),
     array_execute(Codes_w_left, Result, Elements, a1, Codes_left).
 
-array_execute([C | Cs], Result, Elements, Q, Cs) :-
-    Q = a1,
-    C = 93,
-    !,
-    Result =.. [jsonarray, Elements].
-
 array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     Q = a1,
     C \= 93,
@@ -216,12 +192,6 @@ array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     append(Elements, [Result_value], Elements1),
     array_execute(Codes_v_left, Result, Elements1, a2, Codes_left).
 
-array_execute([C | Cs], Result, Elements, Q, Cs) :-
-    Q = a2,
-    C = 93,
-    !,
-    Result =.. [jsonarray, Elements].
-
 array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     Q = a2,
     C = 44,
@@ -229,6 +199,12 @@ array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     value(Cs, Result_value, Codes_v_left),
     append(Elements, [Result_value], Elements1),
     array_execute(Codes_v_left, Result, Elements1, a2, Codes_left).
+
+array_execute([C | Cs], Result, Elements, Q, Cs) :-
+    final_state_array(Q),
+    C = 93,
+    !,
+    Result =.. [jsonarray, Elements].
 
 /*
  * fine predicato array
@@ -248,11 +224,6 @@ whitespace([C | Cs], Codes_left) :-
     whitespace(Cs, Codes_left).
 
 whitespace([C | Cs], [C | Cs]).
-
-whitespace_acceptable(32). %spazio
-whitespace_acceptable(10). %\n
-whitespace_acceptable(13). %\r
-whitespace_acceptable(9).  %\t
 
 /*
  * fine predicato whitespace
@@ -296,16 +267,6 @@ numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
     atom_to_term(Temp, Term, _),
     number(Term),
     Result = Term.
-
-number_acceptable(Code) :-
-    Code >= 48,
-    Code =< 57,
-    !.
-number_acceptable(43).  %+
-number_acceptable(45).  %-
-number_acceptable(46).  %.
-number_acceptable(69).  %E
-number_acceptable(101). %e
 
 /*
  * fine predicato per riconoscimento numeri
@@ -498,6 +459,40 @@ elemento_i_esimo_execute([I | _], 0, I).
 
 %inizio
 
+final_state_obj(o1).
+final_state_obj(o3).
+
+%fine
+%inizio
+
+final_state_array(a1).
+final_state_array(a2).
+
+%fine
+%inizio
+
+whitespace_acceptable(32). %spazio
+whitespace_acceptable(10). %\n
+whitespace_acceptable(13). %\r
+whitespace_acceptable(9).  %\t
+
+%fine
+%inizio
+
+number_acceptable(Code) :-
+    Code >= 48,
+    Code =< 57,
+    !.
+
+number_acceptable(43).  %+
+number_acceptable(45).  %-
+number_acceptable(46).  %.
+number_acceptable(69).  %E
+number_acceptable(101). %e
+
+%fine
+%inizio
+
 chiamabile(jsonobj).
 chiamabile(jsonarray).
 
@@ -511,8 +506,11 @@ valore_base(null).
 %fine
 %inizio
 
-verifica_virgola([_ | [_ | _]], ', ').
-verifica_virgola([_ | []], '').
+verifica_virgola([_ | Xs], '') :-
+    Xs = [],
+    !.
+
+verifica_virgola([_ | _], ', ').
 
 %fine
 %inizio
