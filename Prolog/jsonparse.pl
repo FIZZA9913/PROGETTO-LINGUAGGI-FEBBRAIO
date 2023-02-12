@@ -378,15 +378,15 @@ traduzione_pair((Key, Value), Trad_in, Trad_out) :-
     term_to_atom(Key, Atom),
     atom_concat(Trad_in, Atom, Temp),
     atom_concat(Temp, ' : ', Temp1),
-    traduzione_pair_value(Value, Temp1, Trad_out).
+    traduzione_pair_execute(Value, Temp1, Trad_out).
 
-traduzione_pair_value(Value, Trad_in, Trad_out) :-
+traduzione_pair_execute(Value, Trad_in, Trad_out) :-
     caso_base(Value),
     !,
     term_to_atom(Value, Atom),
     atom_concat(Trad_in, Atom, Trad_out).
 
-traduzione_pair_value(Value, Trad_in, Trad_out) :-
+traduzione_pair_execute(Value, Trad_in, Trad_out) :-
     compound(Value),
     !,
     Value =.. Temp,
