@@ -432,28 +432,6 @@ jsonread(FileName, JSON) :-
 */
 
 /*
- * inizio predicato elemento_i_esimo per
- * estrarre un valore a un dato indice di
- * una lista
-*/
-
-elemento_i_esimo(List, Index, Result) :-
-    number(Index),
-    elemento_i_esimo_execute(List, Index, Result).
-
-elemento_i_esimo_execute([_ | Is], Index, Result) :-
-    Index > 0,
-    !,
-    X is Index - 1,
-    elemento_i_esimo_execute(Is, X, Result).
-
-elemento_i_esimo_execute([I | _], 0, I).
-
-/*
- * fine predicato elemento_i_esimo
-*/
-
-/*
  * inizio predicati utils
 */
 
@@ -534,6 +512,12 @@ atomo_o_stringa_execute(X) :-
     not(string(X)).
 
 %fine
+%inizio
+
+verifica_lista([]).
+verifica_lista([_ | _]).
+
+%fine
 
 /*
  * fine predicati utils
@@ -545,95 +529,77 @@ atomo_o_stringa_execute(X) :-
 /*
 
 jsonaccess prende in input un jsonobject o un jsonarray e seguendo il
-contenuto di Field (lista, stringa o numero) restituisce un risultato.
+contenuto di Fields (lista di stringhe e numeri) o Field (stringa)
+restituisce un risultato.
 
 */
 
+jsonaccess(Jsonobj, Fields, Result) :-
+    jsonparse(_JSONString, Jsonobj),
+    Jsonobj = jsonarray(_Elements),
+    Fields = [],
+    !,
+    Result = fail,
+    fail.
 
 jsonaccess(Jsonobj, Fields, Result) :-
-    jsonaccess_execute(Jsonobj, [Fields], Result).
+    jsonparse(_JSONString, Jsonobj),
+    verifica_lista(Fields),
+    !,
+    jsonaccess_execute(Jsonobj, Fields, Result).
 
 jsonaccess(Jsonobj, Field, Result) :-
+    jsonparse(_JSONString, Jsonobj),
+    string(Field),
+    !,
     jsonaccess_execute(Jsonobj, [Field], Result).
 
 
 %JSONACCESS CON ARRAY
-% Se in input ho un jsonarray, Field può essere solo un numero che
-% indica l'indice dell'array dal quale estrarre il valore.
-% Nel caso iterativo, viene chiamato elemento_i_esimo per cercare dentro
-% l'array.
+% Se in input ho un jsonarray il primo elemento di Fields deve
+% essere un intero che corrisponde alla posizione dell'elemento
+% da estrarre
 
 
-jsonaccess_execute(jsonarray(_), [], _) :- false.
-jsonaccess_execute(jsonarray(Elements), [Field], Risultato) :- elemento_i_esimo(jsonarray(Elements), Field, Risultato).
+jsonaccess_execute(jsonarray(Elements), [Field | Fields], Risultato) :-
+    elemento_i_esimo(Elements, Field, Result),
+    !,
+    jsonaccess_execute(Result, Fields, Risultato).
 
 
 /*
 jsonobject contiene una lista di coppie.
-In questo caso Field è una stringa o una lista.
+In questo caso il primo elemento di Fields è una stringa
 */
 
-%JSONACCESS CON OBJECT - FIELD E' UNA LISTA
-% Quando Field è una lista, può contenere stringhe e/o numeri.
+%JSONACCESS CON OBJECT
+% Fields è una lista il cui primo elemento è una striga
 % Prendo il primo elemento della lista Field e lo metto a confronto con
 % la chiave della prima coppia dell'ogetto json.
 % Se si trova una coppia json che unifica con Field, il valore
-% ritornato:
-% 1 CASO: E' un valore atomico (numero, stringa, true/false/null).
-% Allora questi viene restituito come risultato finale.
-% 2 CASO: E' un valore composto (jsonobject, jsonarray). Applico a
-% quest'ultimo il predicato jsonaccess (ricorsione).
-% Quando la lista è vuota viene restituito il risultato (caso base).
-%VEDERE MEGLIO IL CASO BASE E CAMBIARE IL MODELLO ITERATIVO NEL CASO.
+% è ritornato e viene effettuata la ricerca ricorsivamente sul resto
+% della lista
+% Quando la lista è vuota viene restituito il risultato (caso base)
 
 
-
-%Caso base:
-jsonaccess_execute(jsonobj(Members), [], jsonobj(Members)).
-
-
-%Caso iterativo - 1 CASO:
-jsonaccess_execute(jsonobj(Members), [Field | []], RisultatoFinale) :-
-    estrai_valore(Members, Field, Risultato),
-    caso_base(Risultato),
-    !,
-    RisultatoFinale = Risultato.
-
-
-%Caso iterativo - 2 CASO:
 jsonaccess_execute(jsonobj(Members), [Field | Fields], RisultatoFinale) :-
     estrai_valore(Members, Field, Risultato),
-    compound(Risultato),
     !,
-    jsonaccess(Risultato, Fields, RisultatoFinale).
+    jsonaccess_execute(Risultato, Fields, RisultatoFinale).
 
-
-
-%JSONACCESS CON OBJECT - FIELD E' UNA STRINGA
-% Se Field è una stringa complessa (ossia contiene più elementi, ad
-% esempio: "nome, cognome, 0, ...") allora viene divisa da un
-% predicato suddividi_field in due stringhe: la prima contenente il
-% primo di questi elementi ("nome"), e la seconda contenente il resto
-% della stringa. La prima stringa viene poi passata al predicato
-% estrai_valore che cerca tra tutte le coppie del jsonobject quella che
-% unifica con tale stringa, restituendo un risultato.
-% Il valore ritornato:
-% 1 CASO: E' un valore atomico (numero, stringa, true/false/null).
-% Allora questi viene restituito come risultato finale.
-% 2 CASO: E' un valore composto (jsonobject, jsonarray). Applico a
-% quest'ultimo il predicato jsonaccess (ricorsione).
-% Quando la stringa è vuota viene restituito il risultato (caso base).
-
+jsonaccess_execute(Jsonobj, [], Jsonobj).
 
 
 %PARTE PREDICATI UTILS
 
 % estrai_valore riceve in input una lista di coppie (Chiave,Valore)
-% appartententi ad un jsonobject, e restituisce come risultato il valore
+% appartententi ad un jsonobject e restituisce come risultato il valore
 % della coppia.
 % Il valore restituito è il valore della coppia (Chiave, Valore) quando
 % Chiave = Field.
-%Quando questo non succede, si passa alla coppia successiva.
+% Quando questo non succede, si passa alla coppia successiva.
+
+
 estrai_valore([], _, _) :- fail.
 estrai_valore([(Chiave, Valore) | _], Chiave, Valore) :- !.
 
@@ -641,6 +607,26 @@ estrai_valore([(Chiave, _) | AltreCoppie], Field, Valore) :-
     string(Field),
     Field \= Chiave,
     estrai_valore(AltreCoppie, Field, Valore).
+
+
+% elemento_i_esimo riceve in input una lista di valori appartenenti
+% ad un jsonarray e restituisce come risultato l'elemento in posizione
+% i_esima indicato da Index
+% Se Index ha un valore maggiore della dimensione della lista il
+% predicato fallisce
+
+
+elemento_i_esimo(List, Index, Result) :-
+    integer(Index),
+    elemento_i_esimo_execute(List, Index, Result).
+
+elemento_i_esimo_execute([_ | Is], Index, Result) :-
+    Index > 0,
+    !,
+    X is Index - 1,
+    elemento_i_esimo_execute(Is, X, Result).
+
+elemento_i_esimo_execute([I | _], 0, I).
 
 
 %FINE PREDICATI UTILS
