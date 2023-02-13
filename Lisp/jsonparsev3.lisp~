@@ -153,7 +153,7 @@
 ;;restituito nil.
 ;;quando trovo entrambi gli apici doppi allora chiamo la
 ;;funzione subseq su tali indici.
-(defun p-stringa (string)
+(defun extract-string (string)
   (let ((start (position #\" string)))
     (if start
         (let ((end (position #\" string :start (+ 1 start))))
