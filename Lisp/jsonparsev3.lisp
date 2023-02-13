@@ -141,3 +141,23 @@
 
 ;fine funzioni p-true, p-false, p-null per riconoscimento
 ;valori elementari
+
+
+;;uso la funzione 'position' per trovare la prima e la
+;;seconda occorrenza di apici doppi della stringa 'string'.
+;;position restituisce l'indice intero relativo alla prima e 
+;;seconda posizione di apici doppi nella stringa.
+;;se non viene trovato il primo indice allora non proseguo
+;;la ricerca.
+;;se il primo indice viene trovato, ma il secondo no, viene 
+;;restituito nil.
+;;quando trovo entrambi gli apici doppi allora chiamo la
+;;funzione subseq su tali indici.
+(defun extract-string (string)
+  (let ((start (position #\" string)))
+    (if start
+        (let ((end (position #\" string :start (+ 1 start))))
+          (if end
+              (subseq string (+ 1 start) end)
+            nil))
+      nil)))
