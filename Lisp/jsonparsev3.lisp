@@ -161,3 +161,35 @@
               (subseq string (+ 1 start) end)
             nil))
       nil)))
+
+
+
+
+
+;;MANCA DA CAPIRE LA FUNZIONE MULTIPLE-VALUE-BIND
+;;DA CUI DERIVA L'AGGIORNAMENTO DI TALI FUNZIONI
+
+;funzione che cerca in una stringa il valore true
+;;se c'è restituisce 'True', altrimenti stampa l'errore.
+(defun p-true (stringa)
+  (let ((start (position #\t stringa)))
+    (if start
+        (string= (subseq stringa  start) "true")
+      (t (error "non c'è true")))))
+
+;funzione che cerca in una stringa il valore false
+;;se c'è restituisce 'True', altrimenti stampa l'errore.
+(defun p-false (stringa)
+  (let ((start (position #\f stringa)))
+    (if start
+        (string= (subseq stringa  start) "false")
+      (t (error "non c'è false")))))
+
+;funzione che cerca in una stringa il valore null
+;;se c'è restituisce 'True', altrimenti stampa l'errore.
+(defun p-null (stringa)
+  (let ((start (position #\n stringa)))
+    (if start
+        (string= (subseq stringa  start) "null")
+      (t (error "non c'è true")))))
+ 
