@@ -608,11 +608,13 @@ estrai_valore([(Chiave, _) | AltreCoppie], Field, Valore) :-
     Field \= Chiave,
     estrai_valore(AltreCoppie, Field, Valore).
 
+
 % elemento_i_esimo riceve in input una lista di valori appartenenti
 % ad un jsonarray e restituisce come risultato l'elemento in posizione
 % i_esima indicato da Index
 % Se Index ha un valore maggiore della dimensione della lista il
 % predicato fallisce
+
 
 elemento_i_esimo(List, Index, Result) :-
     integer(Index),
