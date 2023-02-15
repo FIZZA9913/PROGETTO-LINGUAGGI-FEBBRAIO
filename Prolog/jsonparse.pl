@@ -600,13 +600,16 @@ jsonaccess_execute(Jsonobj, [], Jsonobj).
 % Quando questo non succede, si passa alla coppia successiva.
 
 
-estrai_valore([], _, _) :- fail.
-estrai_valore([(Chiave, Valore) | _], Chiave, Valore) :- !.
+estrai_valore(Members, Chiave, Valore) :-
+    string(Chiave),
+    estrai_valore_execute(Members, Chiave, Valore).
 
-estrai_valore([(Chiave, _) | AltreCoppie], Field, Valore) :-
-    string(Field),
+estrai_valore_execute([(Chiave, _) | AltreCoppie], Field, Valore) :-
     Field \= Chiave,
-    estrai_valore(AltreCoppie, Field, Valore).
+    !,
+    estrai_valore_execute(AltreCoppie, Field, Valore).
+
+estrai_valore_execute([(Chiave, Valore) | _], Chiave, Valore).
 
 
 % elemento_i_esimo riceve in input una lista di valori appartenenti

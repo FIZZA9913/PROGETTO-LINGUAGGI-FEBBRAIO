@@ -16,7 +16,6 @@ jsonarray([true], 'a', X) restituisce X = 'a[true]' perchè ovviamente sono pens
 per una traduzione in un contesto creato da jsonparse.
 L'utilizzo con parametri particolari comunque non genera errori perchè ogni predicato verifica 
 i suoi input e quindi al massimo ritorna false.
-L'unica eccezione a questa regola è il predicato estrai valore
 -Il vari predicati non riconoscono stringhe che presentano al loro interno i caratteri di escape
 \", \\ e \/ in quanto atom_codes('"', 34) e atom_codes('\"', 34) restituiscono entrambi
 true rendendo questi due caratteri indistinguibili.
