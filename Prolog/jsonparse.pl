@@ -57,13 +57,13 @@ riconosci_e_traduci(Code_list, Result) :-
     riconosci_e_traduci_execute(Codes_w_left, Result, Codes_left),
     whitespace(Codes_left, []).
 
-riconosci_e_traduci_execute([C | Cs], Result, Codes_o_left) :-
+riconosci_e_traduci_execute([C | Cs], Result, Codes_left) :-
     C = 123,
     !,
-    object([C | Cs], Result, Codes_o_left).
+    object([C | Cs], Result, Codes_left).
 
-riconosci_e_traduci_execute([C | Cs], Result, Codes_a_left) :-
-    array([C | Cs], Result, Codes_a_left).
+riconosci_e_traduci_execute([C | Cs], Result, Codes_left) :-
+    array([C | Cs], Result, Codes_left).
 
 /*
  * fine predicato riconosci_e_traduci
@@ -79,38 +79,38 @@ value(Codes_in, Result, Codes_left) :-
     value_execute(Codes_w_left, Result, Codes_left_a),
     whitespace(Codes_left_a, Codes_left).
 
-value_execute([C | Cs], Result, Codes_o_left) :-
+value_execute([C | Cs], Result, Codes_left) :-
     C = 123,
     !,
-    object([C | Cs], Result, Codes_o_left).
+    object([C | Cs], Result, Codes_left).
 
-value_execute([C | Cs], Result, Codes_a_left) :-
+value_execute([C | Cs], Result, Codes_left) :-
     C = 91,
     !,
-    array([C | Cs], Result, Codes_a_left).
+    array([C | Cs], Result, Codes_left).
 
-value_execute([C | Cs], Result, Codes_t_left) :-
+value_execute([C | Cs], Result, Codes_left) :-
     C = 116,
     !,
-    true([C | Cs], Result, Codes_t_left).
+    true([C | Cs], Result, Codes_left).
 
-value_execute([C | Cs], Result, Codes_f_left) :-
+value_execute([C | Cs], Result, Codes_left) :-
     C = 102,
     !,
-    false([C | Cs], Result, Codes_f_left).
+    false([C | Cs], Result, Codes_left).
 
-value_execute([C | Cs], Result, Codes_n_left) :-
+value_execute([C | Cs], Result, Codes_left) :-
     C = 110,
     !,
-    null([C | Cs], Result, Codes_n_left).
+    null([C | Cs], Result, Codes_left).
 
-value_execute([C | Cs], Result, Codes_s_left) :-
+value_execute([C | Cs], Result, Codes_left) :-
     C = 34,
     !,
-    stringa([C | Cs], Result, Codes_s_left).
+    stringa([C | Cs], Result, Codes_left).
 
-value_execute(Codes_in, Result, Codes_nu_left) :-
-    numero(Codes_in, Result, Codes_nu_left).
+value_execute(Codes_in, Result, Codes_left) :-
+    numero(Codes_in, Result, Codes_left).
 
 /*
  * fine predicato value
@@ -122,7 +122,7 @@ value_execute(Codes_in, Result, Codes_nu_left) :-
 */
 
 object(Codes_in, Result, Codes_left) :-
-    object_execute(Codes_in, Result, [], [], o0, Codes_left).
+    object_execute(Codes_in, Result, [], "", o0, Codes_left).
 
 object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o0,
@@ -131,33 +131,31 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     whitespace(Cs, Codes_w_left),
     object_execute(Codes_w_left, Result, Members, Temp, o1, Codes_left).
 
-object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
+object_execute([C | Cs], Result, Members, _Temp, Q, Codes_left) :-
     Q = o1,
     C \= 125,
     !,
-    stringa([C | Cs], Result_stringa, Codes_s_left),
-    append(Temp, [Result_stringa], Temp1),
+    stringa([C | Cs], Result_s, Codes_s_left),
     whitespace(Codes_s_left, Codes_w_left),
-    object_execute(Codes_w_left, Result, Members, Temp1, o2, Codes_left).
+    object_execute(Codes_w_left, Result, Members, Result_s, o2, Codes_left).
 
-object_execute([C | Cs], Result, Members, [S | []], Q, Codes_left) :-
+object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
     Q = o2,
     C = 58,
     !,
-    value(Cs, Result_value, Codes_v_left),
-    Pair = (S, Result_value),
+    value(Cs, Result_v, Codes_v_left),
+    Pair = (Temp, Result_v),
     append(Members, [Pair], Members1),
-    object_execute(Codes_v_left, Result, Members1, [], o3, Codes_left).
+    object_execute(Codes_v_left, Result, Members1, "", o3, Codes_left).
 
-object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
+object_execute([C | Cs], Result, Members, _Temp, Q, Codes_left) :-
     Q = o3,
     C = 44,
     !,
     whitespace(Cs, Codes_w_left),
-    stringa(Codes_w_left, Result_stringa, Codes_s_left),
-    append(Temp, [Result_stringa], Temp1),
+    stringa(Codes_w_left, Result_s, Codes_s_left),
     whitespace(Codes_s_left, Codes_w1_left),
-    object_execute(Codes_w1_left, Result, Members, Temp1, o2, Codes_left).
+    object_execute(Codes_w1_left, Result, Members, Result_s, o2, Codes_left).
 
 object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
     final_state_obj(Q),
@@ -188,16 +186,16 @@ array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     Q = a1,
     C \= 93,
     !,
-    value([C | Cs], Result_value, Codes_v_left),
-    append(Elements, [Result_value], Elements1),
+    value([C | Cs], Result_v, Codes_v_left),
+    append(Elements, [Result_v], Elements1),
     array_execute(Codes_v_left, Result, Elements1, a2, Codes_left).
 
 array_execute([C | Cs], Result, Elements, Q, Codes_left) :-
     Q = a2,
     C = 44,
     !,
-    value(Cs, Result_value, Codes_v_left),
-    append(Elements, [Result_value], Elements1),
+    value(Cs, Result_v, Codes_v_left),
+    append(Elements, [Result_v], Elements1),
     array_execute(Codes_v_left, Result, Elements1, a2, Codes_left).
 
 array_execute([C | Cs], Result, Elements, Q, Cs) :-

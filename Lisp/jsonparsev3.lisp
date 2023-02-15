@@ -171,11 +171,11 @@
 
 ;funzione che cerca in una stringa il valore true
 ;;se c'è restituisce 'True', altrimenti stampa l'errore.
-(defun p-true (stringa)
-  (let ((start (position #\t stringa)))
-    (if start
-        (string= (subseq stringa  start) "true")
-      (t (error "non c'è true")))))
+;;(defun p-true (stringa)
+ ;; (let ((start (position #\t stringa)))
+    ;;(if start
+        ;;(string= (subseq stringa  start) "true")
+     ;; (t (error "non c'è true")))))
 
 ;funzione che cerca in una stringa il valore false
 ;;se c'è restituisce 'True', altrimenti stampa l'errore.
@@ -192,4 +192,11 @@
     (if start
         (string= (subseq stringa  start) "null")
       (t (error "non c'è true")))))
+
+;;true
+(defun p-true (stringa)
+  (if (string= (subseq stringa 0)
+               "true")
+      (list 'true (subseq stringa 4))
+    (error "Errore di sintassi")))
  

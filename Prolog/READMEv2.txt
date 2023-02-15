@@ -95,8 +95,8 @@ a richiamare il predicato whitespace e poi effettua la chiamata ricorsiva sul re
 e passa allo stato o1.
 2) Una volta che si trova nello stato o1 e il codice in input non è una parentesi graffa chiusa
 procede a richiamare il predicato stringa per il riconoscimento della chiave e poi il predicato whitespace.
-Una volta effettuato ciò inserisce la chiave riconosciuta in una lista che svolge la funzione di variabile
-temporanea ed effettua la chiamata ricorsiva sul resto della lista in input e passa allo stato o2.
+Successivamente effettua la chiamata ricorsiva sul resto della lista passandogli come input il nuovo
+stato o2 e la chiave appena riconosciuta.
 3) Una volta che si trova nello stato o2 dopo aver riconosciuto la chiave chiama il predicato value
 per riconoscere il valore associato ad essa, costruisce la pair e la salva nella variabile con il medesimo nome.
 Una volta effettuato ciò procede ad inserirla nella lista di coppie dell'oggetto e poi effettua la chiamata
