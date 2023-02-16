@@ -27,11 +27,13 @@
 (defun jsonparse-ex (c-ls)
   (cond ((and (= (first c-ls) 123)
               (or (null (p-ws (car (cdr (p-obj c-ls)))))
-                  (zerop (car (p-ws (car (cdr (p-obj c-ls)))))))) (car (p-obj c-ls)))
+                  (zerop (car (p-ws (car (cdr (p-obj c-ls)))))))) 
+         (car (p-obj c-ls)))
         ((and (= (first c-ls) 91)
               (or (null (p-ws (car (cdr (p-array c-ls)))))
-                  (zerop (car (p-ws (car (cdr (p-array c-ls)))))))) (car (p-array c-ls)))
-        (t (error "Errore di sintassi in jsonparse"))))
+                  (zerop (car (p-ws (car (cdr (p-array c-ls)))))))) 
+         (car (p-array c-ls)))
+        (t (error "L'input non è un oggetto o un array"))))
 
 ;;fine funzione jsonparse
 
@@ -97,40 +99,45 @@
 (defun p-obj-ex (c-ls q p memb)
   (cond ((null c-ls) (error "Errore di sintassi"))
         ((and (= (first c-ls) 123)
-              (eql q 'o0)) (p-obj-ex (p-ws (rest c-ls))
-                                     'o1
-                                     p
-                                     memb))
+              (eql q 'o0)) 
+         (p-obj-ex (p-ws (rest c-ls))
+                   'o1
+                   p
+                   memb))
         ((and (not (= (first c-ls) 125))
-              (eql q 'o1)) (let ((vl (car (p-str c-ls)))
-                                 (lf (p-ws (car (cdr (p-str c-ls))))))
-                             (p-obj-ex lf
-                                       'o2
-                                       (append p
-                                               (list vl))
-                                       memb)))
+              (eql q 'o1)) 
+         (let ((vl (car (p-str c-ls)))
+               (lf (p-ws (car (cdr (p-str c-ls))))))
+           (p-obj-ex lf
+                     'o2
+                     (append p
+                             (list vl))
+                     memb)))
         ((and (= (first c-ls) 58)
-              (eql q 'o2)) (let ((vl (car (p-vl (rest c-ls))))
-                                 (lf (car (cdr (p-vl (rest c-ls))))))
-                             (p-obj-ex lf
-                                       'o3
-                                       '()
-                                       (append memb
-                                               (list (append p
-                                                             (list vl)))))))
+              (eql q 'o2)) 
+         (let ((vl (car (p-vl (rest c-ls))))
+               (lf (car (cdr (p-vl (rest c-ls))))))
+           (p-obj-ex lf
+                     'o3
+                     '()
+                     (append memb
+                             (list (append p
+                                           (list vl)))))))
         ((and (= (first c-ls) 44)
-              (eql q 'o3)) (let ((vl (car (p-str (p-ws (rest c-ls)))))
-                                 (lf (p-ws (car (cdr (p-str (p-ws (rest c-ls))))))))
-                             (p-obj-ex lf
-                                       'o2
-                                       (append p
-                                               (list vl))
-                                       memb)))
+              (eql q 'o3)) 
+         (let ((vl (car (p-str (p-ws (rest c-ls)))))
+               (lf (p-ws (car (cdr (p-str (p-ws (rest c-ls))))))))
+           (p-obj-ex lf
+                     'o2
+                     (append p
+                             (list vl))
+                     memb)))
         ((and (= (first c-ls) 125)
               (or (eql q 'o1)
-                  (eql q 'o3))) (list (append '(jsonobj)
-                                              memb)
-                                      (rest c-ls)))
+                  (eql q 'o3))) 
+         (list (append '(jsonobj)
+                       memb)
+               (rest c-ls)))
         (t (error "Errore di sintassi"))))
 
 ;;fine funzione p-obj per riconoscimento
@@ -146,28 +153,32 @@
 (defun p-array-ex (c-ls q elem)
   (cond ((null c-ls) (error "Errore di sintassi"))
         ((and (= (first c-ls) 91)
-              (eql q 'a0)) (p-array-ex (p-ws (rest c-ls))
-                                       'a1
-                                       elem))
+              (eql q 'a0)) 
+         (p-array-ex (p-ws (rest c-ls))
+                     'a1
+                     elem))
         ((and (not (= (first c-ls) 93))
-              (eql q 'a1)) (let ((vl (car (p-vl c-ls)))
-                                 (lf (car (cdr (p-vl c-ls)))))
-                             (p-array-ex lf
-                                         'a2
-                                         (append elem
-                                                 (list vl)))))
+              (eql q 'a1)) 
+         (let ((vl (car (p-vl c-ls)))
+               (lf (car (cdr (p-vl c-ls)))))
+           (p-array-ex lf
+                       'a2
+                       (append elem
+                               (list vl)))))
         ((and (= (first c-ls) 44)
-              (eql q 'a2)) (let ((vl (car (p-vl (rest c-ls))))
-                                 (lf (car (cdr (p-vl (rest c-ls))))))
-                             (p-array-ex lf
-                                         'a2
-                                         (append elem
-                                                 (list vl)))))
+              (eql q 'a2)) 
+         (let ((vl (car (p-vl (rest c-ls))))
+               (lf (car (cdr (p-vl (rest c-ls))))))
+           (p-array-ex lf
+                       'a2
+                       (append elem
+                               (list vl)))))
         ((and (= (first c-ls) 93)
               (or (eql q 'a1)
-                  (eql q 'a2))) (list (append '(jsonarray)
-                                              elem)
-                                      (rest c-ls)))
+                  (eql q 'a2))) 
+         (list (append '(jsonarray)
+                       elem)
+               (rest c-ls)))
         (t (error "Errore di sintassi"))))
 
 ;;fine funzione p-array per riconoscimento
