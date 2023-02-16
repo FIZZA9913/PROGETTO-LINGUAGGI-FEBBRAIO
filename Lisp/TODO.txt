@@ -1,0 +1,7 @@
+FIXME: se il file json finisce con un ws, errore di sintassi, non dovrebbe.
+
+TODO: unire le docs prolog
+TODO: test anche per prolog
+TODO: 80 cols e indent
+TODO: in Lisp traduzione inversa
+TODO: documentazione Lisp
