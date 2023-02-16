@@ -21,15 +21,17 @@
 ;;inizio funzione jsonparse
 
 (defun jsonparse (JSONString)
-  (cond ((stringp JSONString) (jsonparse-ex (conv-str-ls JSONString)))
+  (cond ((stringp JSONString) (jsonparse-ex (p-ws (conv-str-ls JSONString))))
         (t (error "L'input non è una stringa"))))
 
 (defun jsonparse-ex (c-ls)
   (cond ((and (= (first c-ls) 123)
-              (null (car (cdr (p-obj c-ls))))) (car (p-obj c-ls)))
+              (or (null (p-ws (car (cdr (p-obj c-ls)))))
+                  (zerop (car (p-ws (car (cdr (p-obj c-ls)))))))) (car (p-obj c-ls)))
         ((and (= (first c-ls) 91)
-              (null (car (cdr (p-array c-ls))))) (car (p-array c-ls)))
-        (t (error "Errore di sintassi"))))
+              (or (null (p-ws (car (cdr (p-array c-ls)))))
+                  (zerop (car (p-ws (car (cdr (p-array c-ls)))))))) (car (p-array c-ls)))
+        (t (error "Errore di sintassi in jsonparse"))))
 
 ;;fine funzione jsonparse
 

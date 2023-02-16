@@ -16,22 +16,22 @@ jsonarray([true], 'a', X) restituisce X = 'a[true]' perchè ovviamente sono pens
 per una traduzione in un contesto creato da jsonparse.
 L'utilizzo con parametri particolari comunque non genera errori perchè ogni predicato verifica 
 i suoi input e quindi al massimo ritorna false.
--Il vari predicati non riconoscono stringhe che presentano al loro interno i caratteri di escape
+-I vari predicati non riconoscono stringhe che presentano al loro interno i caratteri di escape
 \", \\ e \/ in quanto atom_codes('"', 34) e atom_codes('\"', 34) restituiscono entrambi
 true rendendo questi due caratteri indistinguibili.
 Stesso discorso vale per \\ che viene interpretato giustamente come \ che però essendo 
 un carattere speciale di prolog genera errore così come \/ che non è un carattere di escape presente in prolog.
 -Il parser fa solo un'analisi sintattica degli oggetti/array json quindi nel caso in cui un oggetto abbia chiavi
-duplicate il parser restituisce la traduzione corretta, il problema si presenta quando
-bisogna stampare la seguente traduzione su file .json che giustamente lo interpreta come errore 
-di sintassi e lo stesso discorso vale per le stringhe che presentano al loro interno
+duplicate il parser restituisce la traduzione corretta.
+Il problema si presenta quando bisogna stampare la seguente traduzione su file .json che giustamente 
+lo interpreta come errore di sintassi e lo stesso discorso vale per le stringhe che presentano al loro interno
 ad esempio il carattere \n in quanto esso viene stampato letteralmente come a capo
 e l'effetto è quello di avere una stringa stampata su 2 righe, cosa ovviamente sintatticamente scorretta.
 Questo non inficia comunque la validità del programma in quanto la lettura dallo stesso file restituisce
 la traduzione desiderata.
 -Se nel predicato jsondump viene passato un nome di un file con una estensione non esistente questo 
 predicato procede comunque a creare il file e a scriverci sopra il risultato della traduzione senza
-generare alcuna eccezione e il risultato sarà inoltre leggibile senza problemi con jsonread.
+generare alcuna eccezione o errore e il risultato sarà inoltre leggibile senza problemi con jsonread.
 L'unico problema è che ovviamente questo file non sarà apribile.
 -i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
 qua sotto.
