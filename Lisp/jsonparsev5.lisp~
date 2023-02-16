@@ -1,3 +1,23 @@
+;;;; jsonparse.pl
+;;;;
+;;;; Gruppo formato da:
+;;;; Fizzardi, Fabio, 844726
+;;;; Pascone, Michele, 820633
+;;;; Paulicelli, Sabino, 856111
+
+;; START jsonread
+
+(defun jsonread (filename)
+    "Return a string from file filename"
+    (with-open-file (in filename
+                        :direction :input
+                        :if-does-not-exist :error)
+        (let ((string (make-string (file-length in))))
+            (read-sequence string in)
+            (jsonparse string))))
+
+;; END jsonread
+
 ;;inizio funzione jsonparse
 
 (defun jsonparse (JSONString)

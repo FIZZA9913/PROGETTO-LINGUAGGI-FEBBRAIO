@@ -1,4 +1,4 @@
-;;;; jsonparse.pl
+;;;; jsonparse.lisp
 ;;;;
 ;;;; Gruppo formato da:
 ;;;; Fizzardi, Fabio, 844726
