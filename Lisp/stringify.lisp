@@ -14,6 +14,20 @@
                                     (first elem)
                                     "\""
                                     (virgola elem))))
+        ((integerp (first elem))
+         (jsonarray-ex (rest elem)
+                       (concatenate 'string
+                                    tdr
+                                    (write-to-string (first elem))
+                                    (virgola elem))))
+        ((floatp (first elem))
+         (jsonarray-ex (rest elem)
+                       (concatenate 'string
+                                    tdr
+                                    (format NIL
+                                            "~E"
+                                            (first elem))
+                                    (virgola elem))))
         ((and (or (eql (first elem) 'true)
                   (eql (first elem) 'false)
                   (eql (first elem) 'null)))
