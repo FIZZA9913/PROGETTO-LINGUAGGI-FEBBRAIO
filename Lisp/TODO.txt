@@ -1,4 +1,5 @@
 FIXME: se il file json finisce con un ws, errore di sintassi, non dovrebbe.
+FIXME: controllare cosa succede in caso di stringa terminata con 0 in Prolog
 
 TODO: unire le docs prolog
 TODO: test anche per prolog
