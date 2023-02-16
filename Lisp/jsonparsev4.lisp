@@ -7,6 +7,7 @@
 (defun jsonparse-ex (c-list)
   (cond ((= (first c-list) 123) (p-obj c-list))
         ((= (first c-list) 91) (p-array c-list))))
+;errore
 
 ;;fine funzione jsonparse
 
