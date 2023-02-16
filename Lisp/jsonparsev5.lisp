@@ -231,6 +231,20 @@
 ;;fine funzione p-str per riconoscimento
 ;;stringhe json
 
+;;inizio funzione p-num per riconoscimento
+;;numeri json
+
+(defun p-num (c-ls)
+  (cond ((listp c-ls) (p-num-ex c-ls "" "i"))
+        (t (error "Errore di sintassi"))))
+
+(defun p-num (c-ls t mod)
+  (cond ((and (>= (first c-ls) 48)
+              (=< (first c-ls) 57)))))
+
+;;fine funzione p-num per riconoscimento
+;;numeri json
+
 ;;inizio funzioni p-true, p-false e p-null per
 ;;riconoscimento dei valori elementari true, false e null
 

@@ -1,0 +1,11 @@
+(defun estrai-vl (memb key)
+  (cond ((and (stringp key)
+              (listp memb)) (estrai-vl-ex memb key))
+        (t (error "Input estrai-vl in formato scorretto"))))
+
+(defun estrai-vl-ex (memb key)
+  (cond ((null memb) memb)
+        ((eql (first (first memb))
+              key) (car (cdr (first memb))))
+        ((not (eql (first (first memb))
+                   key)) (estrai-vl-ex (rest memb) key))))

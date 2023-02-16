@@ -619,15 +619,15 @@ estrai_valore_execute([(Chiave, Valore) | _], Chiave, Valore).
 
 elemento_i_esimo(List, Index, Result) :-
     integer(Index),
+    Index >= 0,
     elemento_i_esimo_execute(List, Index, Result).
 
-elemento_i_esimo_execute([_ | Is], Index, Result) :-
-    Index > 0,
-    !,
-    X is Index - 1,
-    elemento_i_esimo_execute(Is, X, Result).
+elemento_i_esimo_execute([E | _], 0, E) :-
+    !.
 
-elemento_i_esimo_execute([I | _], 0, I).
+elemento_i_esimo_execute([_ | Es], Index, Result) :-
+    X is Index - 1,
+    elemento_i_esimo_execute(Es, X, Result).
 
 
 %FINE PREDICATI UTILS

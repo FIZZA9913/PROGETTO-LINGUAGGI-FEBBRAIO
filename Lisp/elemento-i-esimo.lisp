@@ -1,0 +1,11 @@
+(defun elem-i-es (lista index)
+  (cond ((and (integerp index)
+              (listp lista)
+              (> index 0)) (elem-i-es-ex lista index))
+        (t (error "Input elem-i-es in formato scorretto"))))
+
+(defun elem-i-es-ex (lista index)
+  (cond ((null lista) lista)
+        ((= index 0) (first lista))
+        (t (elem-i-es-ex (rest lista)
+                         (- index 1)))))

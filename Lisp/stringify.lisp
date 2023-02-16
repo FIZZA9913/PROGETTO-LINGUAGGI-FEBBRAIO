@@ -36,6 +36,7 @@
                                     tdr
                                     (string (first elem))
                                     (virgola elem))))
+;;errore forse l'and
         ((not (atom (first elem)))
          (jsonarray-ex (rest elem)
                        (concatenate 'string
@@ -49,6 +50,8 @@
         (t (error "Errore di sintassi"))))
 
 (defun virgola (list)
-  (cond ((null (rest list)) "")
-        (t ", ")))
+  (if (listp list)
+      (cond ((null (rest list)) "")
+             (t ", "))
+    (error "Errore di sintassi")))
 
