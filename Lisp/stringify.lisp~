@@ -6,16 +6,6 @@
          (concatenate 'string
                       tdr
                       "]"))
-        ((not (atom (quote (first elem))))
-         (jsonarray-ex (rest elem)
-                       (concatenate 'string
-                                    tdr
-                                    (if (or (eql (car (quote (first elem))) 
-                                                 'jsonarray)
-                                            (eql (car (quote (first elem)))
-                                                 'jsonobj))
-                                        (first elem)
-                                      (error "Errore di sintassi")))))
         ((stringp (first elem))
          (jsonarray-ex (rest elem)
                        (concatenate 'string
@@ -38,15 +28,25 @@
                                             "~E"
                                             (first elem))
                                     (virgola elem))))
-        ((or (eql (first elem) 'true)
-             (eql (first elem) 'false)
-             (eql (first elem) 'null))
+        ((and (or (eql (first elem) 'true)
+                  (eql (first elem) 'false)
+                  (eql (first elem) 'null)))
          (jsonarray-ex (rest elem)
                        (concatenate 'string
                                     tdr
                                     (string (first elem))
                                     (virgola elem))))
 ;;errore forse l'and
+        ((not (atom (first elem)))
+         (jsonarray-ex (rest elem)
+                       (concatenate 'string
+                                    tdr
+                                    (if (or (eql (car (first elem)) 
+                                                 'jsonarray)
+                                            (eql (car (first elem))
+                                                 'jsonobj))
+                                        (first elem)
+                                      (error "Errore di sintassi")))))
         (t (error "Errore di sintassi"))))
 
 (defun virgola (list)
