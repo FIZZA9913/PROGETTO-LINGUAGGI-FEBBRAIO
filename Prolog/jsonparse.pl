@@ -602,12 +602,11 @@ estrai_valore(Members, Chiave, Valore) :-
     string(Chiave),
     estrai_valore_execute(Members, Chiave, Valore).
 
-estrai_valore_execute([(Chiave, _) | AltreCoppie], Field, Valore) :-
-    Field \= Chiave,
-    !,
-    estrai_valore_execute(AltreCoppie, Field, Valore).
+estrai_valore_execute([(Chiave, Valore) | _], Chiave, Valore) :-
+    !.
 
-estrai_valore_execute([(Chiave, Valore) | _], Chiave, Valore).
+estrai_valore_execute([(_Chiave, _) | AltreCoppie], Field, Valore) :-
+    estrai_valore_execute(AltreCoppie, Field, Valore).
 
 
 % elemento_i_esimo riceve in input una lista di valori appartenenti
