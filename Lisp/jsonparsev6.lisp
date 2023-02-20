@@ -33,7 +33,7 @@
 (defun jsonparse (JSONString)
   (if (stringp JSONString) 
       (jsonparse-ex (p-ws (conv-str-ls JSONString)))
-    (error "L'input di jsonparse non ï¿½ una stringa")))
+    (error "L'input di jsonparse non e' una stringa")))
 
 (defun jsonparse-ex (c-ls)
   (if (null c-ls) 
@@ -47,7 +47,7 @@
            (car (p-arr c-ls)))
           ;; errore
           (t
-           (error "L'input non ï¿½ un oggetto o un array")))))
+           (error "L'input non e' un oggetto o un array")))))
 
 ;; fine funzione jsonparse
 
@@ -57,7 +57,7 @@
 (defun conv-str-ls (str)
   (if (stringp str) 
       (conv-str-ls-ex (coerce str 'list))
-    (error "L'input di conv-str-ls non ï¿½ una stringa")))
+    (error "L'input di conv-str-ls non e' una stringa")))
 
 (defun conv-str-ls-ex (ch-ls)
   (if (null ch-ls)
@@ -74,7 +74,7 @@
 (defun conv-ls-str (c-ls)
   (if (ver-ls-cod c-ls) 
       (conv-ls-str-ex c-ls "")
-    (error "L'input di conv-ls-str non ï¿½ una lista di codici")))
+    (error "L'input di conv-ls-str non e' una lista di codici")))
 
 (defun conv-ls-str-ex (c-ls str)
   (if (null c-ls)
@@ -114,7 +114,7 @@
 (defun p-obj (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-obj-ex c-ls 'o0 '() '())
-    (error "L'input di p-obj non ï¿½ una lista di codici")))
+    (error "L'input di p-obj non e' una lista di codici")))
 
 (defun p-obj-ex (c-ls q p memb)
   (cond ((null c-ls) (error "Errore di sintassi in p-obj"))
@@ -175,7 +175,7 @@
 (defun p-arr (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-arr-ex c-ls 'a0 '())
-    (error "L'input di p-arr non ï¿½ una lista di codici")))
+    (error "L'input di p-arr non e' una lista di codici")))
 
 (defun p-arr-ex (c-ls q elem)
   (cond ((null c-ls) (error "Errore di sintassi in p-arr"))
@@ -222,7 +222,7 @@
 (defun p-ws (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-ws-ex c-ls)
-    (error "L'input di p-ws non ï¿½ una lista di codici")))
+    (error "L'input di p-ws non e' una lista di codici")))
 
 (defun p-ws-ex (c-ls)
   (cond ((null c-ls) c-ls)
@@ -241,7 +241,7 @@
 (defun p-str (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-str-ex (conv-ls-str c-ls))
-    (error "L'input di p-str non ï¿½ una lista di codici")))
+    (error "L'input di p-str non e' una lista di codici")))
 
 (defun p-str-ex (str)
   (if (>= (length str) 2)
@@ -252,7 +252,7 @@
             (list (subseq str 1 end)
                   (conv-str-ls (subseq str (+ end 1))))
           (error "Errore di sintassi in p-str")))
-    (error "La lunghezza della lista di p-str non ï¿½ sufficiente"))) 
+    (error "La lunghezza della lista di p-str non e' sufficiente"))) 
 
 ;; fine funzione p-str per riconoscimento
 ;; stringhe json
@@ -273,7 +273,7 @@
 (defun p-true (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-true-ex (conv-ls-str c-ls))
-    (error "L'input di p-true non ï¿½ una lista di codici")))
+    (error "L'input di p-true non e' una lista di codici")))
 
 (defun p-true-ex (str)
   (if (>= (length str) 4)
@@ -282,7 +282,7 @@
           (list 'true
                 (conv-str-ls (subseq str 4)))
         (error "Errore di sintassi in p-true"))
-    (error "La lunghezza della lista di p-true non ï¿½ sufficiente")))
+    (error "La lunghezza della lista di p-true non e' sufficiente")))
 
 ;; fine p-true
 ;; inizio p-false
@@ -290,7 +290,7 @@
 (defun p-false (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-false-ex (conv-ls-str c-ls))
-    (error "L'input di p-false non ï¿½ una lista di codici")))
+    (error "L'input di p-false non e' una lista di codici")))
 
 (defun p-false-ex (str)
   (if (>= (length str) 5)
@@ -299,7 +299,7 @@
           (list 'false
                 (conv-str-ls (subseq str 5)))
         (error "Errore di sintassi in p-false"))
-    (error "La lunghezza dela lista di p-false non ï¿½ sufficiente")))
+    (error "La lunghezza dela lista di p-false non e' sufficiente")))
 
 ;; fine p-false
 ;; inizio p-null
@@ -307,7 +307,7 @@
 (defun p-null (c-ls)
   (if (ver-ls-cod c-ls) 
       (p-null-ex (conv-ls-str c-ls))
-    (error "L'input di p-null non ï¿½ una lista di codici")))
+    (error "L'input di p-null non e' una lista di codici")))
 
 (defun p-null-ex (str)
   (if (>= (length str) 4)
@@ -316,7 +316,7 @@
           (list 'null
                 (conv-str-ls (subseq str 4)))
         (error "Errore di sintassi in p-null"))
-    (error "La lunghezza della lista di p-null non ï¿½ sufficiente")))
+    (error "La lunghezza della lista di p-null non e' sufficiente")))
 
 ;; fine p-null
 
@@ -336,7 +336,57 @@
 
 (defun jsonobj (memb)
   (if (ver-ls-pr memb)
-      ()))
+      (jsonobj-ex memb "{")
+    (error "L'input di jsonobj non e' una lista di coppie")))
+
+(defun jsonobj-ex (memb tdr)
+  (if (null memb)
+      (concatenate 'string
+                   tdr
+                   "}")
+    (jsonobj-ex (rest memb)
+                (concatenate 'string
+                             tdr
+                             (trad-pr (first memb))
+                             (virgola memb)))))
+
+(defun trad-pr (pr)
+  (if (ver-pr pr)
+      (if (stringp (first pr))
+          (concatenate 'string
+                       "\""
+                       (first pr)
+                       "\" : "
+                       (trad-pr-ex (car (cdr pr))))
+        (error "Il primo elemento non e' una chiave"))
+    (error "L'input di trad-pr non è una pair")))
+
+(defun trad-pr-ex (vl)
+  (cond ((stringp vl)
+         (concatenate 'string
+                      "\""
+                      vl
+                      "\""))
+        ;; sopra stringhe sotto numeri
+        ((or (integerp vl)
+             (floatp vl))
+         (format NIl
+                 "~E"
+                 vl))
+        ;; true, false e null
+        ((or (eql vl 'true)
+             (eql vl 'false)
+             (eql vl 'null)) (string vl))
+        ;; jsonarray o jsonobj
+        ((listp vl)
+         (if (or (eql (first vl)
+                      'jsonobj)
+                 (eql (first vl)
+                      'jsonarray))
+             (funcall (first vl) 
+                      (rest vl))
+           (error "Impossibile tradurre l'oggetto o array innestato")))
+        (t (error "Errore di sintassi in jsonobj"))))
 
 ;; fine funzione jsonobj per traduzione oggetto da formato
 ;; object a stringa
@@ -347,7 +397,7 @@
 (defun jsonarray (elem)
   (if (listp elem)
       (jsonarray-ex elem "[")
-    (error "L'input di jsonarray non ï¿½ una lista di elementi")))
+    (error "L'input di jsonarray non e' una lista di elementi")))
 
 (defun jsonarray-ex (elem tdr)
   (cond ((null elem)
@@ -378,10 +428,10 @@
              (eql (first elem) 'false)
              (eql (first elem) 'null))
          (jsonarray-ex (rest elem)
-                        (concatenate 'string
-                                     tdr
-                                     (string (first elem))
-                                     (virgola elem))))
+                       (concatenate 'string
+                                    tdr
+                                    (string (first elem))
+                                    (virgola elem))))
         ;; jsonarray o jsonobj
         ((listp (first elem))
          (let ((f (first (first elem))))
@@ -409,7 +459,7 @@
   (if (and (stringp key)
            (ver-ls-pr memb))
       (estr-vl-ex memb key)
-    (error "L'input di estr-vl ï¿½ in formato scorretto")))
+    (error "L'input di estr-vl e' in formato scorretto")))
 
 (defun estr-vl-ex (memb key)
   (cond ((null memb) memb)
@@ -443,22 +493,32 @@
     NIL))
 
 (defun ver-ls-pr-ex (ls)
-  (cond ((null ls) t)
-        ((listp (first ls))
-         (if (and (stringp (first (first ls)))
-                  (not (null (second (first ls))))
-                  (null (third (first ls))))
-             (ver-ls-pr-ex (rest ls))
-           NIL))))
+  (if (null ls)
+      t
+    (if (ver-pr (first ls))
+        (ver-ls-pr-ex (rest ls))
+      NIL)))
 
 ;; fine ver-ls-pr
+;; inizio ver-pr
+
+(defun ver-pr (pr)
+  (if (listp pr)
+      (if (and (not (null (first pr)))
+               (not (null (second pr)))
+               (null (third pr)))
+          t
+        NIL)
+    NIL))
+
+;; fine ver-pr
 ;; inizio virgola
 
 (defun virgola (ls)
   (if (listp ls)
       (cond ((null (rest ls)) "")
             (t ", "))
-    (error "L'input di virgola non ï¿½ una lista")))
+    (error "L'input di virgola non e' una lista")))
 
 ;; fine virgola
 

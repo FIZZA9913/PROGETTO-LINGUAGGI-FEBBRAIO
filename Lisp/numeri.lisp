@@ -22,3 +22,5 @@
            (if number 
                (cons number rest) rest))))
 
+;; read from string per numeri
+
