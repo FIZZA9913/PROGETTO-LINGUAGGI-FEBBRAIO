@@ -4,7 +4,7 @@
 ;; Paulicelli Sabino 856111
 
 ;; START jsondump
-
+;; FIXME: deve restituire il nome del file o il percorso
 (defun jsondump (JSON filename)
     (with-open-file (out filename
                          :direction :output
