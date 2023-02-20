@@ -12,7 +12,16 @@
                       :if-does-not-exist :error)
     (let ((stringa (make-string (file-length in))))
       (read-sequence stringa in)
-      (jsonparse stringa))))
+      (string-trim '(#\Space
+                     #\NewLine
+                     #\Backspace
+                     #\Tab
+                     #\Page
+                     #\Rubout
+                     #\Return
+                     #\Null)
+                   stringa)
+      stringa)))
 
 ;; END jsonread
 
