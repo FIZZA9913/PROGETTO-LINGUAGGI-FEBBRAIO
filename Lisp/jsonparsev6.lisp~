@@ -304,6 +304,21 @@
 ;; inizio funzione elem-i-es per estrazione valore in posizione
 ;; index da una lista
 
+(defun elem-i-es (ls index)
+  (cond ((and (integerp index)
+              (listp ls)
+              (>= index 0)) (elem-i-es-ex ls index))
+        (t (error "L'input di elem-i-es è in formato scorretto"))))
+
+(defun elem-i-es-ex (ls index)
+  (cond ((null ls) ls)
+        ((= index 0) (first ls))
+        (t (elem-i-es-ex (rest ls)
+                         (- index 1)))))
+
+;; fine funzione elem-i-es per estrazione valore in posizione
+;; index da una lista
+
 ;; inizio funzione estr-vl per estrazione valore da una lista
 ;; di coppie in base ad una chiave
 
