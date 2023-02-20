@@ -301,9 +301,6 @@
 ;; fine funzioni p-true, p-false e p-null per
 ;; riconoscimento dei valori elementari true, false e null
 
-;; inizio funzione elem-i-es per estrazione valore in posizione
-;; index da una lista
-
 ;; inizio funzione estr-vl per estrazione valore da una lista
 ;; di coppie in base ad una chiave
 
@@ -348,8 +345,9 @@
         (t NIL)))
 
 (defun rem0 (c-ls)
-  (cond ((ver-ls-cod c-ls) (rem0-ex c-ls))
-        (t (error "L'input di rem0 non è una lista di codici"))))
+  (if (ver-ls-cod c-ls)
+      (rem0-ex c-ls)
+    (error "L'input di rem0 non è una lista di codici")))
 
 (defun rem0-ex (c-ls)
   (cond ((null c-ls) c-ls)
