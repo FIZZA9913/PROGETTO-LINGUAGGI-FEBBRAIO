@@ -10,9 +10,18 @@
   (with-open-file (in filename
                       :direction :input
                       :if-does-not-exist :error)
-    (let ((string (make-string (file-length in))))
-      (read-sequence string in)
-      (jsonparse string))))
+    (let ((stringa (make-string (file-length in))))
+      (read-sequence stringa in)
+      (string-trim '(#\Space
+                     #\NewLine
+                     #\Backspace
+                     #\Tab
+                     #\Page
+                     #\Rubout
+                     #\Return
+                     #\Null)
+                   stringa)
+      stringa)))
 
 ;; END jsonread
 
@@ -20,7 +29,7 @@
 
 (defun jsonparse (JSONString)
   (cond ((stringp JSONString) 
-         (jsonparse-ex (p-ws (rem0 (conv-str-ls JSONString)))))
+         (jsonparse-ex (p-ws (conv-str-ls JSONString))))
         (t (error "L'input di jsonparse non è una stringa"))))
 
 (defun jsonparse-ex (c-ls)
@@ -351,7 +360,8 @@
 
 (defun rem0-ex (c-ls)
   (cond ((null c-ls) c-ls)
-        ((= (first c-ls) 0) (rem0-ex (rest c-ls)))
+        ((= (car (last c-ls)) 0) 
+         (reverse (cdr (reverse c-ls))))
         (t c-ls)))
 
 ;; END UTILS
