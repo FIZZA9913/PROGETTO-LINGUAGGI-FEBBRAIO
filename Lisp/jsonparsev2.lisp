@@ -28,9 +28,7 @@
                          :direction :output
                          :if-exists :supersede
                          :if-does-not-exist :create)
-        (mapcar (lambda (e)
-                (format out "~S" e))
-                '((1 . A) (2 . B) (42 . QD) (3 . D)))))
+                    (format out JSON)))
 
 ;; SCRIVERE UNA STRINGA SU FILE (FORSE)
 ;(defun write-file (string outfile &key (action-if-exists :error))
@@ -57,7 +55,7 @@
                (parsearray (rest charlist)))
               (t (print "Syntax error in the JSON file.")))))
 
-;; potrebbe diventare una lambda, forse verrà usata solo da jsonparse
+;; potrebbe diventare una lambda, forse verrï¿½ usata solo da jsonparse
 ;(defun string-to-char-list (input-string)
 ;    "Return a list of all characters in the string"
 ;    (assert (stringp input-string) (input-string) "string-to-char-list input error: not a valid string")
