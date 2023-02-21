@@ -323,29 +323,6 @@
 ;; fine funzioni p-true, p-false e p-null per
 ;; riconoscimento dei valori elementari true, false e null
 
-;; inizio p-num
-
-(defun p-num (ls-cs)
-  (if (ver-ls-cod ls-cs)
-      (p-num-ex ls-cs "")
-    (error "L'input di conv-ls-str non e' una lista di codici")))
-
-(defun p-num-ex (ls-cs str)
-  (let ((num-as-code (car ls-cs)))
-       (if (or (and (not (null num-as-code))
-                    (>= num-as-code 48)
-                    (<= num-as-code 57)) ; 0-9
-               (eql num-as-code 43) ;+
-               (eql num-as-code 45) ;-
-               (eql num-as-code 46) ;.
-               (eql num-as-code 101)) ;e
-           (p-num-ex (rest ls-cs)
-                     (concatenate 'string str
-                                  (string (code-char num-as-code))))
-         (cons (read-from-string str) (cons ls-cs nil)))))
-
-;; fine p-num
-
 ;; inizio funzione trad_inv per traduzione da formato
 ;; object a stringa
 
