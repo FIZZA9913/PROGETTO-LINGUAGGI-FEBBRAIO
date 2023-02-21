@@ -326,7 +326,22 @@
 ;; inizio funzione trad_inv per traduzione da formato
 ;; object a stringa
 
+(defun trad-inv (ls)
+  (if (listp ls)
+      (trad-inv-ex ls)
+    (error "L'input di trad-inv non è una lista")))
 
+(defun trad-inv-ex (ls)
+  (cond ((null ls)
+         (error "Nessun valore presente in input"))
+        ;; chiamata a sottofunzioni
+        ((or (eql (first ls)
+                  'jsonobj)
+             (eql (first ls)
+                  'jsonarray))
+         (funcall (first ls) (rest ls)))
+        ;; errore
+        (t (error "Errore di sintassi in trad-iv"))))
 
 ;; fine funzione trad_inv per traduzione da formato
 ;; object a stringa
@@ -335,58 +350,7 @@
 ;; object a stringa
 
 (defun jsonobj (memb)
-  (if (ver-ls-pr memb)
-      (jsonobj-ex memb "{")
-    (error "L'input di jsonobj non e' una lista di coppie")))
-
-(defun jsonobj-ex (memb tdr)
-  (if (null memb)
-      (concatenate 'string
-                   tdr
-                   "}")
-    (jsonobj-ex (rest memb)
-                (concatenate 'string
-                             tdr
-                             (trad-pr (first memb))
-                             (virgola memb)))))
-
-(defun trad-pr (pr)
-  (if (ver-pr pr)
-      (if (stringp (first pr))
-          (concatenate 'string
-                       "\""
-                       (first pr)
-                       "\" : "
-                       (trad-pr-ex (car (cdr pr))))
-        (error "Il primo elemento non e' una chiave"))
-    (error "L'input di trad-pr non è una pair")))
-
-(defun trad-pr-ex (vl)
-  (cond ((stringp vl)
-         (concatenate 'string
-                      "\""
-                      vl
-                      "\""))
-        ;; sopra stringhe sotto numeri
-        ((or (integerp vl)
-             (floatp vl))
-         (format NIl
-                 "~E"
-                 vl))
-        ;; true, false e null
-        ((or (eql vl 'true)
-             (eql vl 'false)
-             (eql vl 'null)) (string vl))
-        ;; jsonarray o jsonobj
-        ((listp vl)
-         (if (or (eql (first vl)
-                      'jsonobj)
-                 (eql (first vl)
-                      'jsonarray))
-             (funcall (first vl) 
-                      (rest vl))
-           (error "Impossibile tradurre l'oggetto o array innestato")))
-        (t (error "Errore di sintassi in jsonobj"))))
+  (print memb))
 
 ;; fine funzione jsonobj per traduzione oggetto da formato
 ;; object a stringa
@@ -395,9 +359,7 @@
 ;; object a stringa
 
 (defun jsonarray (elem)
-  (if (listp elem)
-      (jsonarray-ex elem "[")
-    (error "L'input di jsonarray non e' una lista di elementi")))
+  (jsonarray-ex elem "["))
 
 (defun jsonarray-ex (elem tdr)
   (cond ((null elem)
@@ -414,15 +376,23 @@
                                     "\""
                                     (virgola elem))))
         ;; numeri
-        ((or (floatp (first elem))
-             (integerp (first elem)))
+        ((or (integerp (first elem))
+             (floatp (first elem)))
          (jsonarray-ex (rest elem)
-                       (concatenate 'string
-                                    tdr
-                                    (format NIL
-                                            "~E"
-                                            (first elem))
-                                    (virgola elem))))
+                       (if (<= (first elem) 
+                               1000000)
+                           (concatenate 'string
+                                        tdr
+                                        (format NIL
+                                                "~D"
+                                                (first elem))
+                                        (virgola elem))
+                         (concatenate 'string
+                                      tdr
+                                      (format NIL
+                                              "~E"
+                                              (first elem))
+                                      (virgola elem)))))
         ;; true, false e null
         ((or (eql (first elem) 'true)
              (eql (first elem) 'false)
@@ -432,22 +402,20 @@
                                     tdr
                                     (string (first elem))
                                     (virgola elem))))
-        ;; jsonarray o jsonobj
+        ;; jsonobj o jsonarray
         ((listp (first elem))
          (let ((f (first (first elem))))
-           (if (or (eql f
-                        'jsonobj)
-                   (eql f
-                        'jsonarray))
+           (if (or (eql f 'jsonobj)
+                   (eql f 'jsonarray))
                (jsonarray-ex (rest elem)
                              (concatenate 'string
                                           tdr
-                                          (funcall f
+                                          (funcall f 
                                                    (rest (first elem)))
                                           (virgola elem)))
-             (error "Impossibile tradurre l'oggetto o array innestato"))))
+             (error "Impossibile riconoscere l'oggetto o array innestato"))))
         ;; errore
-        (t (error "Errore di sintassi in jsonarray"))))
+        (t (error "Valore non riconoscibile in jsonarray"))))
 
 ;; fine funzione jsonarray per traduzione array da formato
 ;; object a stringa
