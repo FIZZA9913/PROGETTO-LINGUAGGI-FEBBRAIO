@@ -10,7 +10,7 @@
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (format out (concatenate 'string (trad-inv JSON) (string #\NewLine))))
+    (format out (trad-inv JSON)))
   filename)
 
 ;; END jsondump
