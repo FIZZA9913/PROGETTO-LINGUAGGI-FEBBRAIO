@@ -10,7 +10,7 @@
                        :direction :output
                        :if-exists :supersede
                        :if-does-not-exist :create)
-    (format out JSON))
+    (format out (trad-inv JSON)))
   filename)
 
 ;; END jsondump
@@ -377,7 +377,7 @@
                   'jsonarray))
          (funcall (first ls) (rest ls)))
         ;; errore
-        (t (error "Errore di sintassi in trad-iv"))))
+        (t (error "Errore di sintassi in trad-inv"))))
 
 ;; fine funzione trad_inv per traduzione da formato
 ;; object a stringa
