@@ -432,20 +432,12 @@
         ((or (integerp (first elem))
              (floatp (first elem)))
          (jsonarray-ex (rest elem)
-                       (if (<= (first elem)
-                               1000000)
-                           (concatenate 'string
-                                        trd
-                                        (format NIL
-                                                "~D"
-                                                (first elem))
-                                        (virgola elem))
-                         (concatenate 'string
-                                      trd
-                                      (format NIL
-                                              "~E"
-                                              (first elem))
-                                      (virgola elem)))))
+                       (concatenate 'string
+                                    trd
+                                    (format NIL
+                                            "~E"
+                                            (first elem))
+                                    (virgola elem))))
         ;; true, false e null
         ((or (eql (first elem) 'true)
              (eql (first elem) 'false)
@@ -491,14 +483,9 @@
         ;; sopra stringhe sotto numeri
         ((or (integerp vl)
              (floatp vl))
-         (if (<= vl
-                 1000000)
-             (format NIL
-                     "~D"
-                     vl)
-           (format NIL
-                   "~E"
-                   vl)))
+         (format NIL
+                 "~E"
+                 vl))
         ;; true, false e null
         ((or (eql vl 'true)
              (eql vl 'false)
