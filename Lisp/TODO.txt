@@ -1,7 +1,10 @@
 TODO: unire le docs prolog
 TODO: test anche per prolog
+TODO: test input/output prolog linux
+TODO: test lisp
 TODO: 80 cols e indent
-TODO: in Lisp traduzione inversa
 TODO: documentazione Lisp
-
-string-downcase per lisp
+TODO: jsonaccess
+TODO: testare nuova versione jsondump
+TODO: verifiche input jsondump e jsonread
+TODO: su prolog \\ funziona se non è la fine di una stringa

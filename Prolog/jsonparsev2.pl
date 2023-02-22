@@ -225,50 +225,6 @@ whitespace([C | Cs], [C | Cs]).
 */
 
 /*
- * inizio predicati per riconoscimento valori
- * elementari true, false e null
-*/
-
-true([116, 114, 117, 101 | Cs], true, Cs).
-
-false([102, 97, 108, 115, 101 | Cs], false, Cs).
-
-null([110, 117, 108, 108 | Cs], null, Cs).
-
-/*
- * fine predicati per riconoscimento valori
- * elementari true, false e null
-*/
-
-/*
- * inizio predicato per riconoscimento numeri
-*/
-
-numero(Codes_in, Result, Codes_left) :-
-    numero_execute(Codes_in, Result, '', Codes_left).
-
-numero_execute([], Result, Temp, []) :-
-    atom_to_term(Temp, Term, _),
-    number(Term),
-    Result = Term.
-
-numero_execute([C | Cs], Result, Temp, Codes_left) :-
-    number_acceptable(C),
-    !,
-    atom_codes(Atom, [C]),
-    atom_concat(Temp, Atom, Temp1),
-    numero_execute(Cs, Result, Temp1, Codes_left).
-
-numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
-    atom_to_term(Temp, Term, _),
-    number(Term),
-    Result = Term.
-
-/*
- * fine predicato per riconoscimento numeri
-*/
-
-/*
  * inizio predicato per riconoscimento stringhe
 */
 
@@ -304,6 +260,50 @@ stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
 */
 
 /*
+ * inizio predicato per riconoscimento numeri
+*/
+
+numero(Codes_in, Result, Codes_left) :-
+    numero_execute(Codes_in, Result, '', Codes_left).
+
+numero_execute([], Result, Temp, []) :-
+    atom_to_term(Temp, Term, _),
+    number(Term),
+    Result = Term.
+
+numero_execute([C | Cs], Result, Temp, Codes_left) :-
+    number_acceptable(C),
+    !,
+    atom_codes(Atom, [C]),
+    atom_concat(Temp, Atom, Temp1),
+    numero_execute(Cs, Result, Temp1, Codes_left).
+
+numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
+    atom_to_term(Temp, Term, _),
+    number(Term),
+    Result = Term.
+
+/*
+ * fine predicato per riconoscimento numeri
+*/
+
+/*
+ * inizio predicati per riconoscimento valori
+ * elementari true, false e null
+*/
+
+true([116, 114, 117, 101 | Cs], true, Cs).
+
+false([102, 97, 108, 115, 101 | Cs], false, Cs).
+
+null([110, 117, 108, 108 | Cs], null, Cs).
+
+/*
+ * fine predicati per riconoscimento valori
+ * elementari true, false e null
+*/
+
+/*
  * inizio predicato jsonobj
 */
 
@@ -323,6 +323,33 @@ jsonobj_execute([], Trad_in, Trad_out) :-
 
 /*
  * fine predicato jsonobj
+*/
+
+/*
+ * inizio predicato traduzione pair
+*/
+
+traduzione_pair((Key, Value), Trad_in, Trad_out) :-
+    string(Trad_in),
+    string(Key),
+    term_string(Key, String),
+    string_concat(Trad_in, String, Temp),
+    string_concat(Temp, " : ", Temp1),
+    traduzione_pair_execute(Value, Temp1, Trad_out).
+
+traduzione_pair_execute(Value, Trad_in, Trad_out) :-
+    caso_base(Value),
+    !,
+    term_string(Value, String),
+    string_concat(Trad_in, String, Trad_out).
+
+traduzione_pair_execute(Value, Trad_in, Trad_out) :-
+    compound(Value),
+    !,
+    applica(Value, Trad_in, Trad_out).
+
+/*
+ * fine predicato traduzione pair
 */
 
 /*
@@ -356,33 +383,6 @@ jsonarray_execute([], Trad_in, Trad_out) :-
 
 /*
  * fine predicato jsonarray
-*/
-
-/*
- * inizio predicato traduzione pair
-*/
-
-traduzione_pair((Key, Value), Trad_in, Trad_out) :-
-    string(Trad_in),
-    string(Key),
-    term_string(Key, String),
-    string_concat(Trad_in, String, Temp),
-    string_concat(Temp, " : ", Temp1),
-    traduzione_pair_execute(Value, Temp1, Trad_out).
-
-traduzione_pair_execute(Value, Trad_in, Trad_out) :-
-    caso_base(Value),
-    !,
-    term_string(Value, String),
-    string_concat(Trad_in, String, Trad_out).
-
-traduzione_pair_execute(Value, Trad_in, Trad_out) :-
-    compound(Value),
-    !,
-    applica(Value, Trad_in, Trad_out).
-
-/*
- * fine predicato traduzione pair
 */
 
 /*
@@ -565,6 +565,9 @@ jsonaccess_execute(jsonobj(Members), [Field | Fields], RisultatoFinale) :-
     estrai_valore(Members, Field, Risultato),
     !,
     jsonaccess_execute(Risultato, Fields, RisultatoFinale).
+
+%CASO BASE
+% Se in input ho un valore e una lista vuota ritorno quel valore
 
 jsonaccess_execute(Jsonobj, [], Jsonobj).
 
