@@ -453,7 +453,7 @@
          (jsonarray-ex (rest elem)
                        (concatenate 'string
                                     trd
-                                    (string (first elem))
+                                    (string-downcase (first elem))
                                     (virgola elem))))
         ;; jsonobj o jsonarray
         ((and (listp (first elem))
@@ -503,7 +503,7 @@
         ((or (eql vl 'true)
              (eql vl 'false)
              (eql vl 'null))
-         (string vl))
+         (string-downcase vl))
         ;; jsonobj o jsonarray
         ((and (listp vl)
               (or (eql (first vl)
