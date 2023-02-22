@@ -330,7 +330,6 @@ jsonobj_execute([], Trad_in, Trad_out) :-
 */
 
 traduzione_pair((Key, Value), Trad_in, Trad_out) :-
-    string(Trad_in),
     string(Key),
     term_string(Key, String),
     string_concat(Trad_in, String, Temp),
