@@ -41,7 +41,8 @@ jsonparse(JSONString, Object) :-
 */
 
 /*
- * inizio predicato riconosci_e_traduci
+ * inizio predicato riconosci_e_traduci per riconoscimento
+ * oggetti o array json
 */
 
 riconosci_e_traduci(Code_list, Result) :-
@@ -58,7 +59,8 @@ riconosci_e_traduci_execute([C | Cs], Result, Codes_left) :-
     array([C | Cs], Result, Codes_left).
 
 /*
- * fine predicato riconosci_e_traduci
+ * fine predicato riconosci_e_traduci per riconoscimento
+ * oggetti o array json
 */
 
 /*
@@ -126,7 +128,7 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
 
 object_execute([C | Cs], Result, Members, _Temp, Q, Codes_left) :-
     Q = o1,
-    C \= 125,
+    C = 34,
     !,
     stringa([C | Cs], Result_s, Codes_s_left),
     whitespace(Codes_s_left, Codes_w_left),
@@ -225,7 +227,8 @@ whitespace([C | Cs], [C | Cs]).
 */
 
 /*
- * inizio predicato per riconoscimento stringhe
+ * inizio predicato stringa per
+ * riconoscimento stringhe json
 */
 
 stringa(Codes_in, Result, Codes_left) :-
@@ -256,11 +259,13 @@ stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
     Result = Term.
 
 /*
- * fine predicato per riconoscimento stringhe
+ * fine predicato stringa per
+ * riconoscimento stringhe json
 */
 
 /*
- * inizio predicato per riconoscimento numeri
+ * inizio predicato numero per
+ * riconoscimento numeri json
 */
 
 numero(Codes_in, Result, Codes_left) :-
@@ -284,11 +289,13 @@ numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
     Result = Term.
 
 /*
- * fine predicato per riconoscimento numeri
+ * fine predicato numero per
+ * riconoscimento numeri json
 */
 
 /*
- * inizio predicati per riconoscimento valori
+ * inizio predicati true, false e null
+ * per riconoscimento valori
  * elementari true, false e null
 */
 
@@ -299,12 +306,14 @@ false([102, 97, 108, 115, 101 | Cs], false, Cs).
 null([110, 117, 108, 108 | Cs], null, Cs).
 
 /*
- * fine predicati per riconoscimento valori
+ * fine predicati true, false e null
+ * per riconoscimento valori
  * elementari true, false e null
 */
 
 /*
- * inizio predicato jsonobj
+ * inizio predicato jsonobj per conversione
+ * oggetto json da formato object a stringa
 */
 
 jsonobj(Members, Trad_in, Trad_out) :-
@@ -322,11 +331,14 @@ jsonobj_execute([], Trad_in, Trad_out) :-
     string_concat(Trad_in, "}", Trad_out).
 
 /*
- * fine predicato jsonobj
+ * fine predicato jsonobj per conversione
+ * oggetto json da formato object a stringa
 */
 
 /*
- * inizio predicato traduzione pair
+ * inizio predicato traduzione_pair per
+ * conversione coppia di elementi di un
+ * jsonobj in una stringa
 */
 
 traduzione_pair((Key, Value), Trad_in, Trad_out) :-
@@ -348,11 +360,14 @@ traduzione_pair_execute(Value, Trad_in, Trad_out) :-
     applica(Value, Trad_in, Trad_out).
 
 /*
- * fine predicato traduzione pair
+ * inizio predicato traduzione_pair per
+ * conversione coppia di elementi di un
+ * jsonobj in una stringa
 */
 
 /*
- * inizio predicato jsonarray
+ * inizio predicato jsonarray per conversione
+ * array json da formato object a stringa
 */
 
 jsonarray(Elements, Trad_in, Trad_out) :-
@@ -374,14 +389,15 @@ jsonarray_execute([E | Es], Trad_in, Trad_out) :-
     !,
     applica(E, Trad_in, Trad),
     verifica_virgola([E | Es], Virgola),
-    string_concat(Trad, Virgola, Temp3),
-    jsonarray_execute(Es, Temp3, Trad_out).
+    string_concat(Trad, Virgola, Temp),
+    jsonarray_execute(Es, Temp, Trad_out).
 
 jsonarray_execute([], Trad_in, Trad_out) :-
     string_concat(Trad_in, "]", Trad_out).
 
 /*
- * fine predicato jsonarray
+ * fine predicato jsonarray per conversione
+ * array json da formato object a stringa
 */
 
 /*
@@ -410,7 +426,7 @@ jsonread(FileName, JSON) :-
     jsonparse(JSONString, JSON).
 
 /*
- * fine predicato jsonread
+ * fine predicato jsonread per lettura da file
 */
 
 /*
@@ -431,10 +447,10 @@ final_state_array(a2).
 % fine final_state_array
 % inizio whitespace_acceptable
 
-whitespace_acceptable(32). %spazio
+whitespace_acceptable(9).  %\t
 whitespace_acceptable(10). %\n
 whitespace_acceptable(13). %\r
-whitespace_acceptable(9).  %\t
+whitespace_acceptable(32). %spazio
 
 % fine whitespace_acceptable
 % inizio number_acceptable
@@ -557,8 +573,8 @@ jsonaccess_execute(jsonarray(Elements), [Field | Fields], Risultato) :-
 
 %JSONACCESS CON OBJECT
 % Se in input ho un jsonobj il primo elemento di Fields deve
-% essere un intero che corrisponde alla posizione dell'elemento
-% da estrarre
+% essere una stringa che corrisponde alla chiave del valore
+% da estrarre nella lista di coppie
 
 jsonaccess_execute(jsonobj(Members), [Field | Fields], RisultatoFinale) :-
     estrai_valore(Members, Field, Risultato),
