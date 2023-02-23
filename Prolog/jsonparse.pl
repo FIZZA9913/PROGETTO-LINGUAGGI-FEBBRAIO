@@ -360,7 +360,7 @@ traduzione_pair_execute(Value, Trad_in, Trad_out) :-
     applica(Value, Trad_in, Trad_out).
 
 /*
- * inizio predicato traduzione_pair per
+ * fine predicato traduzione_pair per
  * conversione coppia di elementi di un
  * jsonobj in una stringa
 */

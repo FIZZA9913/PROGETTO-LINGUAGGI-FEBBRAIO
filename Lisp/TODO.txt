@@ -6,3 +6,4 @@ TODO: 80 cols e indent
 TODO: documentazione Lisp
 TODO: su prolog \\ funziona se non è la fine di una stringa
 TODO: jsondump lisp resetta il file
+TODO: premesse prolog caratteri escape anche fuori da stringhe

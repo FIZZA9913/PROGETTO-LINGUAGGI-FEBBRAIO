@@ -5,6 +5,7 @@ Pascone, Michele, 820633
 Paulicelli, Sabino, 856111
 
 Premesse:
+
 1)i vari predicati al di fuori di quelli richiesti dal testo del progetto sono
 perfettamente utilizzabili e funzionanti anche singolarmente tranne:
 -predicati _execute
@@ -26,7 +27,6 @@ rendendo di conseguenza questi due caratteri indistinguibili
 -\\ in quanto \ è un carattere speciale in prolog e nell'ambiente SWI-prolog viene riconosciuto
 come backslash (\) causando quindi gli stessi problemi di (\")
 
-
 3)Il parser fa solo un'analisi sintattica degli oggetti/array json quindi nel caso in cui un oggetto abbia chiavi
 duplicate il parser restituisce la traduzione corretta.
 Il problema si presenta quando bisogna stampare la seguente traduzione su file .json che giustamente 
@@ -38,7 +38,7 @@ la traduzione desiderata.
 
 4)Se nel predicato jsondump viene passato un nome di un file con una estensione non esistente questo 
 predicato procede comunque a creare il file e a scriverci sopra il risultato della traduzione senza
-generare alcuna eccezione o errore,  e il risultato sarà inoltre leggibile senza problemi con jsonread.
+generare alcuna eccezione o errore e il risultato sarà inoltre leggibile senza problemi con jsonread.
 L'unico problema è che ovviamente questo file non sarà apribile.
 
 5)i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
@@ -49,8 +49,9 @@ qua sotto.
 */
 
 Questo è il predicato citato nel testo del progetto che ha 3 modalità d'uso diverse:
+
 1) traduzione da atomo/stringa in formato object
-2) traduzione da formato object a stringa scritta in formato json
+2) traduzione da formato object a stringa scritta in formato json standard
 3) verifica uguaglianza tra le 2 scritture anche con termini parzialmente istanziati
 per il formato object
 
@@ -76,7 +77,7 @@ Questo predicato non è altro che il predicato value limitato a oggetti ed array
 */
 
 Da ora in poi i seguenti predicati avranno un'interfaccia standard e non sono altro che la codifica
-dei diagrammi della sintassi del linguaggio json presenti sul sito www.json.org.
+dei diagrammi della sintassi del linguaggio json presenti sul sito www.json.org
 L'interfaccia è la seguente:
 -Codes_in è la lista di codici di caratteri in ingresso
 -Result è il risultato della traduzione in formato object
@@ -95,20 +96,25 @@ Il predicato object non è altro che la codifica del diagramma presente sul sito
 in un automa a stati finiti e serve a riconoscere oggetti json.
 
 Il funzionamento spiegato brevemente è il seguente:
+
 1) inizia dallo stato o0 e se il primo carattere in input è la parentesi graffa aperta procede
 a richiamare il predicato whitespace e poi effettua la chiamata ricorsiva sul resto della lista in input
 e passa allo stato o1.
-2) Una volta che si trova nello stato o1 e il codice in input è un doppio apice
+
+2) Una volta che si trova nello stato o1 e il codice in input è un apice doppio
 procede a richiamare il predicato stringa per il riconoscimento della chiave e poi il predicato whitespace.
 Successivamente effettua la chiamata ricorsiva sul resto della lista passandogli come input il nuovo
 stato o2 e la chiave appena riconosciuta.
+
 3) Una volta che si trova nello stato o2 dopo aver riconosciuto la chiave chiama il predicato value
 per riconoscere il valore associato ad essa, costruisce la pair e la salva nella variabile con il medesimo nome.
-Una volta effettuato ciò procede ad inserirla nella lista di coppie dell'oggetto, effettua poi la chiamata
+Una volta effettuato ciò procede ad inserirla nella lista di coppie dell'oggetto ed effettua poi la chiamata
 ricorsiva sul resto della lista in input passando allo stato o3 e resettando il valore temporaneo della chiave.
+
 4) Arrivato nello stato o3 e avendo una virgola in input fa gli stessi passaggi dello stato o1, l'unica differenza
 è la presenza di una chiamata a whitespace prima della chiamata a stringa come specificato dal diagramma presente
-sul sito www.json.org.
+sul sito www.json.org
+
 5) Gli stati finali sono o1 e o3 e se il codice in input è una parentesi graffa chiusa procede a creare il 
 predicato jsonobj con i members costruiti precedentemente e ritorna la lista dei codici rimanenti.
 
@@ -139,17 +145,20 @@ Il seguente predicato è la codifica del diagramma presente sul sito www.json-or
 e serve a riconoscere stringhe json.
 
 Il funzionamento in breve è il seguente:
-1) inizia dallo stato s0 e se il primo carattere in input è un doppio apice procede
+
+1) inizia dallo stato s0 e se il primo carattere in input è un apice doppio procede
 a concatenare tale carattere su un atomo usato come variabile temporanea, effettua poi 
 la chiamata ricorsiva sul resto della lista in input passa allo stato s1.
-2) Una volta che si trova nello stato s1 e il codice in input non è un doppio apice
+
+2) Una volta che si trova nello stato s1 e il codice in input non è un apice doppio
 procede a concatenare tale carattere all'atomo usato come variabile temporanea.
 Successivamente effettua la chiamata ricorsiva sul resto della lista passandogli come input il nuovo
 stato s1 e l'atomo aggiornato.
+
 3) Una volta che si trova nello stato s1 e il codice in input è un apice doppio effettua i seguenti passaggi:
--concatena i doppi apici sull'atomo temporaneo
+-concatena l'apice doppio sull'atomo temporaneo
 -trasforma l'atomo temporaneo in un termine
--verifica se tale termine è una stringa; se tale condizione è soddisfatta ritorna tale stringa, altrimenti fallisce.
+-verifica se tale termine è una stringa e se si ritorna la sua conversione in stringa, altrimenti fallisce
 
 /*
  * numero
@@ -180,7 +189,7 @@ il corrispondente valore booleano e la lista di codici rimanenti.
  * jsonobj
 */
 
-Il seguente predicato serve a jsonparse per fare la traduzione da formato object a stringa ed  è richiamato direttamente
+Il seguente predicato serve a jsonparse per fare la traduzione da formato object a stringa ed è richiamato direttamente
 da jsonparse con 2 parametri aggiuntivi:
 -una traduzione in ingresso alla quale concatenare il risultato (Trad_in)
 -il risultato della traduzione e concatenazione con Trad_in (Trad_out)
@@ -200,8 +209,7 @@ risultato.
 */
 
 Questo predicato serve a tradurre una coppia per oggetti json.
-
-Questo predicato riceve in input una coppia chiave-valore, una traduzione in ingresso e il risultato della traduzione.
+Riceve in input una coppia chiave-valore, una traduzione in ingresso e una variabile dove salvare la traduzione.
 
 Una volta verificato che la chiave sia una stringa procede a trasformare tale termine in una stringa
 e ad effettuare le varie concatenazioni, una di queste è con " : " che rappresenta la virgola nelle coppie
@@ -214,14 +222,14 @@ I due casi sono i seguenti:
 
 Nel primo caso procede a tradurre tale termine in una stringa e a concatenarla con la traduzione in ingresso.
 Nel secondo caso si passa il controllo al predicato applica il quale avrà il compito di richiamare
-il corretto predicato relativo alla traduzione dell'oggetto o array innestato.
+il predicato correttp relativo alla traduzione dell'oggetto o array innestato.
 
 /*
  * jsonarray
 */
 
-Molto simile al predicato jsonobj, questo predicato differisce nella sintassi del valore riconosciuto, 
-in quanto deve gestire non più dati del tipo coppie chiave-valore ma lista di elementi.
+Molto simile al predicato jsonobj, questo predicato differisce nella sintassi del valore riconosciuto
+in quanto non deve gestire più dati del tipo coppie chiave-valore ma una lista di elementi.
 
 Il predicato d'appoggio che effettua la traduzione vera e propria ha 3 casistiche:
 -traduzione di un caso base
