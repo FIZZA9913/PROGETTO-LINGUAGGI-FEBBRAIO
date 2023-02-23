@@ -36,25 +36,89 @@ L'unico problema è che ovviamente questo file non sarà apribile.
 -Le varie funzioni e le rispettive ausiliarie sono divise in sezioni e il loro funzionamento
 è spiegato qua sotto.
 
-
-
-
-;; jsonparse
-
-E' la funzione citata nel testo del progetto
-
-
-;;jsonparse-ex
-
-
-;; jsondump (MODIFICA)
-stampa un oggetto json scritto a lista e ritorna il nome di un file.
-Scrive l'oggetto json sul filename in sintassi json. Ritorna il filename.
-L'oggetto json è una stringa. lo passa a 
-JSON è un oggetto json che viene trasformato in una stringa e viene buttato su un file.
-formattato su trad-inv.
+;; jsondump 
+La funzione prende in input una struttura json, risultato della funzione 'jsonparse', e filename.
+La funzione richiama 'trad-inv' sulla struttura JSON, convertendolo in formato stringa e successivamente
+lo stampa su filename. Dopodiché ritorna il nome di filename.
+Se filename non è una stringa, o l'oggetto JSON non è stato costruito correttamente,
+viene ritornato errore.
 
 ;;jsonread 
+La funzione prende in input un filename e ritorna una lista, risultato della funzione 'jsonparse'. 
+
+
+;;trad-inv 
+Nome esteso: traduction-inverse
+La funzione controlla se l'input è una lista di caratteri; se tale condizione è verificata viene chiamata la
+funzione 'trad-inv-ex'.
+Altrimenti, viene ritornato errore.
+
+
+;;trad-inv-ex 
+Nome esteso: traduction-inverse-execute
+La funzione controlla due possibili scenari:
+1) il primo elemento della lista è un jsonobject - viene invocato la funzione 'jsonobj'
+2) il primo elemento della lista è un jsonarray - viene invocato la funzione 'jsonarray'
+Se la lista in input è vuota, o il primo elemento della lista non appartiene alle casistiche di cui sopra,
+ viene ritornato errore.
+
+
+;;jsonobj
+La funzione controlla se ciò che ha ricevuto in input  è una lista di coppie; se tale condizione è verificata
+la lista viene passata alla funzione di appoggio 'jsonobj-ex'.
+Altrimenti, viene ritornato un errore.
+
+;;jsonobj-ex  trd = traduzione
+Nome esteso: jsonobject-execute
+La funzione traduce il jsonobject in formato stringa.
+Per questo motivo, quando la funzione viene eseguita su una lista di coppie vuota, concatena tale
+lista di caratteri con il carattere '}' . 
+Altrimenti, esegue ricorsivamente sul resto della lista separando una coppia dalle altre attraverso
+ la funzione 'virgola'.
+
+;;trad-pr
+Nome esteso: traduzione-pair
+La funzione riceve in input una coppia e le concatena diversi caratteri per uniformarla al formato
+richiesto json. Dopodiché chiama sul resto della coppia (ossia un valore) la funzione 
+di appoggio 'trad-pr-ex'.
+
+;;trad-pr-ex
+Nome esteso: traduzione-pair-execute
+La funzione controlla che tipo di valore è presente nella coppia:
+- Se il valore è una stringa, viene uniformata al formato json con apici doppi.
+- Se il valore è un numero - un intero - viene scritto così com'è.
+- Se il valore è un numero - un float - viene scritto così com'è.
+- Se il valore è un booleano - true, false o null - viene restituito il valore booleano corrispondente.
+- Se il valore è un jsonobject chiama la funzione d'appoggio 'trad-inv'.
+- Se il valore è un jsonarray chiama la funzione di'appoggio 'trad-inv'.
+Altrimenti restituisce un errore.
+
+
+;;jsonarray
+La funzione controlla se il valore in input è una lista; se tale condizione è verificata viene chiamata
+la funzione di appoggio 'jsonarray-ex'.
+Altrimenti, viene ritornato errore.
+
+;;jsonarray-ex
+Nome esteso: jsonarray-execute
+La funzione traduce il jsonarray in formato stringa.
+Per questo motivo, quando la funzione viene eseguita su una lista di elementi vuota, concatena tale
+stringa con la stringa " ] " . 
+Altrimenti, esegue ricorsivamente sul resto della lista separando un elemento dagli altri attraverso
+ la funzione 'virgola'.
+Nel caso in cui il primo elemento della lista in input sia un numero intero o float, viene ritornato
+in formato esponenziale.
+Nel caso in cui il primo elemento della lista in input sia un valore booleano
+ viene ritornato così com'è.
+Nel caso in cui il primo elemento della lista in input sia un jsonobject o un jsonarray, questi viene
+tradotto per intero  attraverso la funzione 'trad-inv'.
+Dopodiché la funzione jsonarray viene eseguita sul resto della lista in maniera ricorsiva.
+
+
+;;jsonparse (descrizione del metodo)
+
+
+;;jsonparse-ex(descrizione dell'implementazione)
 
 
 ;;p-vl (modifica)
@@ -112,7 +176,7 @@ Una volta che tutti i whitespace sono stati cancellati, viene ritornata la lista
 ;;ver-ls-cod
 Nome esteso: verifica-lista-codici
 La funzione controlla se l'input è una lista (in particolare viene passata una lista di codici) e se questa condizione
-è verificata, tale lista viene passata al predicato 'ver-ls-cod-ex'.
+è verificata, tale lista viene passata al funzione 'ver-ls-cod-ex'.
 In altri casi, la funzione ritorna 'nil'.
 
 ;;ver-ls-cod-ex
@@ -125,7 +189,7 @@ Nel caso in cui siano presenti degli elementi all'interno della lista che non si
 
 ;;p-str
 Se la lista ricevuta in input è una lista di codici (il ché è controllato dalla funzione 'ver-ls-cod'), 
-questa viene prima trasformata in stringa attraverso il predicato 'conv-ls-str', e poi passata alla  
+questa viene prima trasformata in stringa attraverso il funzione 'conv-ls-str', e poi passata alla  
 funzione 'p-str-ex' descritta qui sotto.
 
 ;;p-str-ex
@@ -140,7 +204,7 @@ ritornato un errore.
 ;;conv-str-ls
 Nome esteso: convert-string-list
 La funzione controlla se ciò che ha ricevuto in input sia una stringa, dopodiché converte tale stringa
-in una lista di caratteri e la passa al predicato 'conv-str-ls-ex'.
+in una lista di caratteri e la passa al funzione 'conv-str-ls-ex'.
 Altrimenti, se il parametro in input non è una stringa, viene ritornato 'nil'.
 
 ;;conv-str-ls-ex
@@ -211,21 +275,6 @@ La funzione riceve in input una lista ed una stringa, e ritorna una stringa che 
 La funzione prende il primo elemento di tale lista e controlla se è un numero json; 
 
 
-;;trad-inv (niente)
-
-
-;;trad-inv-ex (niente)
-
-
-;;jsonobj (niente)
-
-
-;;jsonarray (niente)
-
-
-;;jsonarray-ex (niente)
-
-
 ;;estr-vl (da aggiungere)
 Nome esteso: estrai-valore
 La funzione serve per estrarre un valore da una lista di coppie in base ad una chiave.
@@ -264,4 +313,3 @@ Nel caso in cui l'input non fosse una lista viene restituito errore.
 
 
 ;;;;;; PARTE JSONACCESS
-
