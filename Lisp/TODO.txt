@@ -4,7 +4,5 @@ TODO: test input/output prolog linux
 TODO: test lisp
 TODO: 80 cols e indent
 TODO: documentazione Lisp
-TODO: jsonaccess
-TODO: testare nuova versione jsondump
-TODO: verifiche input jsondump e jsonread
 TODO: su prolog \\ funziona se non è la fine di una stringa
+TODO: jsondump lisp resetta il file
