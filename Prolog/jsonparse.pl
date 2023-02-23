@@ -34,22 +34,15 @@ jsonparse(JSONString, Object) :-
     var(JSONString),
     compound(Object),
     !,
-    Object =.. Temp,
-    append(Temp, [''], Temp1),
-    append(Temp1, [JSONString], Temp2),
-    Temp2 = [X | _],
-    chiamabile(X),
-    Predicate =.. Temp2,
-    call(Predicate).
+    applica(Object, "", JSONString).
 
 /*
  * fine predicato jsonparse
 */
 
 /*
- * inizio predicato riconosci_e_traduci
- * che va a simulare il predicato value
- * ma solo su oggetti e array
+ * inizio predicato riconosci_e_traduci per riconoscimento
+ * oggetti o array json
 */
 
 riconosci_e_traduci(Code_list, Result) :-
@@ -66,7 +59,8 @@ riconosci_e_traduci_execute([C | Cs], Result, Codes_left) :-
     array([C | Cs], Result, Codes_left).
 
 /*
- * fine predicato riconosci_e_traduci
+ * fine predicato riconosci_e_traduci per riconoscimento
+ * oggetti o array json
 */
 
 /*
@@ -76,8 +70,8 @@ riconosci_e_traduci_execute([C | Cs], Result, Codes_left) :-
 
 value(Codes_in, Result, Codes_left) :-
     whitespace(Codes_in, Codes_w_left),
-    value_execute(Codes_w_left, Result, Codes_left_a),
-    whitespace(Codes_left_a, Codes_left).
+    value_execute(Codes_w_left, Result, Codes_v_left),
+    whitespace(Codes_v_left, Codes_left).
 
 value_execute([C | Cs], Result, Codes_left) :-
     C = 123,
@@ -113,7 +107,8 @@ value_execute(Codes_in, Result, Codes_left) :-
     numero(Codes_in, Result, Codes_left).
 
 /*
- * fine predicato value
+ * fine predicato value per riconoscimento
+ * valori json
 */
 
 /*
@@ -133,7 +128,7 @@ object_execute([C | Cs], Result, Members, Temp, Q, Codes_left) :-
 
 object_execute([C | Cs], Result, Members, _Temp, Q, Codes_left) :-
     Q = o1,
-    C \= 125,
+    C = 34,
     !,
     stringa([C | Cs], Result_s, Codes_s_left),
     whitespace(Codes_s_left, Codes_w_left),
@@ -164,7 +159,8 @@ object_execute([C | Cs], Result, Members, _Temp, Q, Cs) :-
     Result =.. [jsonobj, Members].
 
 /*
- * fine predicato object
+ * fine predicato object per
+ * riconoscimento oggetti json
 */
 
 /*
@@ -205,7 +201,8 @@ array_execute([C | Cs], Result, Elements, Q, Cs) :-
     Result =.. [jsonarray, Elements].
 
 /*
- * fine predicato array
+ * fine predicato array per
+ * riconoscimento array json
 */
 
 /*
@@ -224,54 +221,14 @@ whitespace([C | Cs], Codes_left) :-
 whitespace([C | Cs], [C | Cs]).
 
 /*
- * fine predicato whitespace
+ * fine predicato whitespace per rimozione
+ * caratteri di spaziatura da una lista
+ * di codici di caratteri in input
 */
 
 /*
- * inizio predicati per riconoscimento valori
- * elementari true, false e null
-*/
-
-true([116, 114, 117, 101 | Cs], true, Cs).
-
-false([102, 97, 108, 115, 101 | Cs], false, Cs).
-
-null([110, 117, 108, 108 | Cs], null, Cs).
-
-/*
- * fine predicati per riconoscimento valori elementari
-*/
-
-/*
- * inizio predicato per riconoscimento numeri
-*/
-
-numero(Codes_in, Result, Codes_left) :-
-    numero_execute(Codes_in, Result, '', Codes_left).
-
-numero_execute([], Result, Temp, []) :-
-    atom_to_term(Temp, Term, _),
-    number(Term),
-    Result = Term.
-
-numero_execute([C | Cs], Result, Temp, Codes_left) :-
-    number_acceptable(C),
-    !,
-    atom_codes(Atom, [C]),
-    atom_concat(Temp, Atom, Temp1),
-    numero_execute(Cs, Result, Temp1, Codes_left).
-
-numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
-    atom_to_term(Temp, Term, _),
-    number(Term),
-    Result = Term.
-
-/*
- * fine predicato per riconoscimento numeri
-*/
-
-/*
- * inizio predicato per riconoscimento stringhe
+ * inizio predicato stringa per
+ * riconoscimento stringhe json
 */
 
 stringa(Codes_in, Result, Codes_left) :-
@@ -302,101 +259,145 @@ stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
     Result = Term.
 
 /*
- * fine predicato per riconoscimento stringhe
+ * fine predicato stringa per
+ * riconoscimento stringhe json
 */
 
 /*
- * inizio predicato jsonobj
+ * inizio predicato numero per
+ * riconoscimento numeri json
+*/
+
+numero(Codes_in, Result, Codes_left) :-
+    numero_execute(Codes_in, Result, '', Codes_left).
+
+numero_execute([], Result, Temp, []) :-
+    atom_to_term(Temp, Term, _),
+    number(Term),
+    Result = Term.
+
+numero_execute([C | Cs], Result, Temp, Codes_left) :-
+    number_acceptable(C),
+    !,
+    atom_codes(Atom, [C]),
+    atom_concat(Temp, Atom, Temp1),
+    numero_execute(Cs, Result, Temp1, Codes_left).
+
+numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
+    atom_to_term(Temp, Term, _),
+    number(Term),
+    Result = Term.
+
+/*
+ * fine predicato numero per
+ * riconoscimento numeri json
+*/
+
+/*
+ * inizio predicati true, false e null
+ * per riconoscimento valori
+ * elementari true, false e null
+*/
+
+true([116, 114, 117, 101 | Cs], true, Cs).
+
+false([102, 97, 108, 115, 101 | Cs], false, Cs).
+
+null([110, 117, 108, 108 | Cs], null, Cs).
+
+/*
+ * fine predicati true, false e null
+ * per riconoscimento valori
+ * elementari true, false e null
+*/
+
+/*
+ * inizio predicato jsonobj per conversione
+ * oggetto json da formato object a stringa
 */
 
 jsonobj(Members, Trad_in, Trad_out) :-
-    atom(Trad_in),
-    atom_concat(Trad_in, '{', Temp),
+    string(Trad_in),
+    string_concat(Trad_in, "{", Temp),
     jsonobj_execute(Members, Temp, Trad_out).
 
 jsonobj_execute([P | Ps], Trad_in, Trad_out) :-
     traduzione_pair(P, Trad_in, Temp),
     verifica_virgola([P | Ps], Virgola),
-    atom_concat(Temp, Virgola, Temp1),
+    string_concat(Temp, Virgola, Temp1),
     jsonobj_execute(Ps, Temp1, Trad_out).
 
 jsonobj_execute([], Trad_in, Trad_out) :-
-    atom_concat(Trad_in, '}', Trad_out).
+    string_concat(Trad_in, "}", Trad_out).
 
 /*
- * fine predicato jsonobj
+ * fine predicato jsonobj per conversione
+ * oggetto json da formato object a stringa
 */
 
 /*
- * inizio predicato jsonarray
-*/
-
-jsonarray(Elements, Trad_in, Trad_out) :-
-    atom(Trad_in),
-    atom_concat(Trad_in, '[', Temp),
-    jsonarray_execute(Elements, Temp, Trad_out).
-
-jsonarray_execute([E | Es], Trad_in, Trad_out) :-
-    caso_base(E),
-    !,
-    term_to_atom(E, Atom),
-    verifica_virgola([E | Es], Virgola),
-    atom_concat(Trad_in, Atom, Temp),
-    atom_concat(Temp, Virgola, Temp1),
-    jsonarray_execute(Es, Temp1, Trad_out).
-
-jsonarray_execute([E | Es], Trad_in, Trad_out) :-
-    compound(E),
-    !,
-    E =.. Temp,
-    append(Temp, [Trad_in], Temp1),
-    append(Temp1, [Trad], Temp2),
-    Temp2 = [X | _],
-    chiamabile(X),
-    Predicate =.. Temp2,
-    call(Predicate),
-    verifica_virgola([E | Es], Virgola),
-    atom_concat(Trad, Virgola, Temp3),
-    jsonarray_execute(Es, Temp3, Trad_out).
-
-jsonarray_execute([], Trad_in, Trad_out) :-
-    atom_concat(Trad_in, ']', Trad_out).
-
-/*
- * fine predicato jsonarray
-*/
-
-/*
- * inizio predicato traduzione pair
+ * inizio predicato traduzione_pair per
+ * conversione coppia di elementi di un
+ * jsonobj in una stringa
 */
 
 traduzione_pair((Key, Value), Trad_in, Trad_out) :-
-    atom(Trad_in),
     string(Key),
-    term_to_atom(Key, Atom),
-    atom_concat(Trad_in, Atom, Temp),
-    atom_concat(Temp, ' : ', Temp1),
+    term_string(Key, String),
+    string_concat(Trad_in, String, Temp),
+    string_concat(Temp, " : ", Temp1),
     traduzione_pair_execute(Value, Temp1, Trad_out).
 
 traduzione_pair_execute(Value, Trad_in, Trad_out) :-
     caso_base(Value),
     !,
-    term_to_atom(Value, Atom),
-    atom_concat(Trad_in, Atom, Trad_out).
+    term_string(Value, String),
+    string_concat(Trad_in, String, Trad_out).
 
 traduzione_pair_execute(Value, Trad_in, Trad_out) :-
     compound(Value),
     !,
-    Value =.. Temp,
-    append(Temp, [Trad_in], Temp1),
-    append(Temp1, [Trad_out], Temp2),
-    Temp2 = [X | _],
-    chiamabile(X),
-    Predicate =.. Temp2,
-    call(Predicate).
+    applica(Value, Trad_in, Trad_out).
 
 /*
- * fine predicato traduzione pair
+ * inizio predicato traduzione_pair per
+ * conversione coppia di elementi di un
+ * jsonobj in una stringa
+*/
+
+/*
+ * inizio predicato jsonarray per conversione
+ * array json da formato object a stringa
+*/
+
+jsonarray(Elements, Trad_in, Trad_out) :-
+    string(Trad_in),
+    string_concat(Trad_in, "[", Temp),
+    jsonarray_execute(Elements, Temp, Trad_out).
+
+jsonarray_execute([E | Es], Trad_in, Trad_out) :-
+    caso_base(E),
+    !,
+    term_string(E, String),
+    verifica_virgola([E | Es], Virgola),
+    string_concat(Trad_in, String, Temp),
+    string_concat(Temp, Virgola, Temp1),
+    jsonarray_execute(Es, Temp1, Trad_out).
+
+jsonarray_execute([E | Es], Trad_in, Trad_out) :-
+    compound(E),
+    !,
+    applica(E, Trad_in, Trad),
+    verifica_virgola([E | Es], Virgola),
+    string_concat(Trad, Virgola, Temp),
+    jsonarray_execute(Es, Temp, Trad_out).
+
+jsonarray_execute([], Trad_in, Trad_out) :-
+    string_concat(Trad_in, "]", Trad_out).
+
+/*
+ * fine predicato jsonarray per conversione
+ * array json da formato object a stringa
 */
 
 /*
@@ -406,13 +407,12 @@ traduzione_pair_execute(Value, Trad_in, Trad_out) :-
 jsondump(JSON, FileName) :-
     atomo_o_stringa(FileName),
     jsonparse(JSONString, JSON),
-    atom_string(JSONString, Stringa),
     open(FileName, write, Out),
-    write(Out, Stringa),
+    write(Out, JSONString),
     close(Out).
 
 /*
- * fine predicato jsondump
+ * fine predicato jsondump per scrittura su file
 */
 
 /*
@@ -422,38 +422,38 @@ jsondump(JSON, FileName) :-
 jsonread(FileName, JSON) :-
     atomo_o_stringa(FileName),
     exists_file(FileName),
-    read_file_to_string(FileName, Stringa, []),
-    jsonparse(Stringa, JSON).
+    read_file_to_string(FileName, JSONString, []),
+    jsonparse(JSONString, JSON).
 
 /*
- * fine predicato jsonread
+ * fine predicato jsonread per lettura da file
 */
 
 /*
  * inizio predicati utils
 */
 
-%inizio
+% inizio final_state_obj
 
 final_state_obj(o1).
 final_state_obj(o3).
 
-%fine
-%inizio
+% fine final_state_obj
+% inizio final_state_array
 
 final_state_array(a1).
 final_state_array(a2).
 
-%fine
-%inizio
+% fine final_state_array
+% inizio whitespace_acceptable
 
-whitespace_acceptable(32). %spazio
+whitespace_acceptable(9).  %\t
 whitespace_acceptable(10). %\n
 whitespace_acceptable(13). %\r
-whitespace_acceptable(9).  %\t
+whitespace_acceptable(32). %spazio
 
-%fine
-%inizio
+% fine whitespace_acceptable
+% inizio number_acceptable
 
 number_acceptable(Code) :-
     Code >= 48,
@@ -466,30 +466,30 @@ number_acceptable(46).  %.
 number_acceptable(69).  %E
 number_acceptable(101). %e
 
-%fine
-%inizio
+% fine number_acceptable
+% inizio chiamabile
 
 chiamabile(jsonobj).
 chiamabile(jsonarray).
 
-%fine
-%inizio
+% fine chiamabile
+% inizio valore_base
 
 valore_base(true).
 valore_base(false).
 valore_base(null).
 
-%fine
-%inizio
+% fine valore_base
+% inizio verifica_virgola
 
-verifica_virgola([_ | Xs], '') :-
+verifica_virgola([_ | Xs], "") :-
     Xs = [],
     !.
 
-verifica_virgola([_ | _], ', ').
+verifica_virgola([_ | _], ", ").
 
-%fine
-%inizio
+% fine verifica_virgola
+% inizio caso_base
 
 caso_base(X) :-
     not(caso_base_execute(X)).
@@ -499,8 +499,8 @@ caso_base_execute(X) :-
     not(string(X)),
     not(number(X)).
 
-%fine
-%inizio
+% fine caso_base
+% inizio atomo_o_stringa
 
 atomo_o_stringa(X) :-
     not(atomo_o_stringa_execute(X)).
@@ -509,20 +509,29 @@ atomo_o_stringa_execute(X) :-
     not(atom(X)),
     not(string(X)).
 
-%fine
-%inizio
+% fine atomo_o_stringa
+% inizio verifica_lista
 
 verifica_lista([]).
 verifica_lista([_ | _]).
 
-%fine
+% fine verifica_lista
+% inizio applica
+
+applica(Jsonobj, Trad_in, Trad_out) :-
+    string(Trad_in),
+    Jsonobj =.. [X, Y | []],
+    chiamabile(X),
+    Chiamabile =.. [X, Y, Trad_in, Trad_out],
+    call(Chiamabile).
+
+% fine applica
 
 /*
  * fine predicati utils
 */
 
-
-%AGGIORNAMENTO
+% AGGIORNAMENTO
 
 /*
 
@@ -552,41 +561,30 @@ jsonaccess(Jsonobj, Field, Result) :-
     !,
     jsonaccess_execute(Jsonobj, [Field], Result).
 
-
 %JSONACCESS CON ARRAY
 % Se in input ho un jsonarray il primo elemento di Fields deve
 % essere un intero che corrisponde alla posizione dell'elemento
 % da estrarre
-
 
 jsonaccess_execute(jsonarray(Elements), [Field | Fields], Risultato) :-
     elemento_i_esimo(Elements, Field, Result),
     !,
     jsonaccess_execute(Result, Fields, Risultato).
 
-
-/*
-jsonobject contiene una lista di coppie.
-In questo caso il primo elemento di Fields è una stringa
-*/
-
 %JSONACCESS CON OBJECT
-% Fields è una lista il cui primo elemento è una striga
-% Prendo il primo elemento della lista Field e lo metto a confronto con
-% la chiave della prima coppia dell'ogetto json.
-% Se si trova una coppia json che unifica con Field, il valore
-% è ritornato e viene effettuata la ricerca ricorsivamente sul resto
-% della lista
-% Quando la lista è vuota viene restituito il risultato (caso base)
-
+% Se in input ho un jsonobj il primo elemento di Fields deve
+% essere una stringa che corrisponde alla chiave del valore
+% da estrarre nella lista di coppie
 
 jsonaccess_execute(jsonobj(Members), [Field | Fields], RisultatoFinale) :-
     estrai_valore(Members, Field, Risultato),
     !,
     jsonaccess_execute(Risultato, Fields, RisultatoFinale).
 
-jsonaccess_execute(Jsonobj, [], Jsonobj).
+%CASO BASE
+% Se in input ho un valore e una lista vuota ritorno quel valore
 
+jsonaccess_execute(Jsonobj, [], Jsonobj).
 
 %PARTE PREDICATI UTILS
 
@@ -597,7 +595,6 @@ jsonaccess_execute(Jsonobj, [], Jsonobj).
 % Chiave = Field.
 % Quando questo non succede, si passa alla coppia successiva.
 
-
 estrai_valore(Members, Chiave, Valore) :-
     string(Chiave),
     estrai_valore_execute(Members, Chiave, Valore).
@@ -605,16 +602,14 @@ estrai_valore(Members, Chiave, Valore) :-
 estrai_valore_execute([(Chiave, Valore) | _], Chiave, Valore) :-
     !.
 
-estrai_valore_execute([(_Chiave, _) | AltreCoppie], Field, Valore) :-
+estrai_valore_execute([(_Chiave, _Valore) | AltreCoppie], Field, Valore) :-
     estrai_valore_execute(AltreCoppie, Field, Valore).
-
 
 % elemento_i_esimo riceve in input una lista di valori appartenenti
 % ad un jsonarray e restituisce come risultato l'elemento in posizione
 % i_esima indicato da Index
 % Se Index ha un valore maggiore della dimensione della lista il
 % predicato fallisce
-
 
 elemento_i_esimo(List, Index, Result) :-
     integer(Index),
@@ -627,6 +622,5 @@ elemento_i_esimo_execute([E | _], 0, E) :-
 elemento_i_esimo_execute([_ | Es], Index, Result) :-
     X is Index - 1,
     elemento_i_esimo_execute(Es, X, Result).
-
 
 %FINE PREDICATI UTILS
