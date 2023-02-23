@@ -115,45 +115,72 @@ tradotto per intero  attraverso la funzione 'trad-inv'.
 Dopodiché la funzione jsonarray viene eseguita sul resto della lista in maniera ricorsiva.
 
 
-;;jsonparse (descrizione del metodo)
+;;jsonparse 
+La funzione controlla se ciò che ha ricevuto in input sia una stringa che identifica una struttura json;
+se tale condizione è soddisfatta l'input viene trasformato in una lista di caratteri senza whitespace,
+la quale viene passata alla funzione di supporto 'jsonparse-ex'.
+Nel caso in cui il dato in ingresso non rappresenti una stringa, viene ritornato errore.
+
+;;jsonparse-ex (da modificare)
+Nome esteso: jsonparse-execute
+La funzione riceve in input una lista di caratteri e gestisce una serie di casistiche diverse:
+- Se il primo carattere della lista è una parentesi graffa aperta, viene riconosciuto un jsonobject e 
+la lista viene passata alla funzione 'p-obj' che fa il parsing dell'oggetto.
+- Se il primo carattere della lista è una parentesi quadrata aperta, viene riconosciuto un jsonarray
+e la lista viene passata alla funzione 'p-arr' che fa il parsing dell'array.
+- Se non si presenta nessuna di queste due casistiche viene ritornato un errore.
 
 
-;;jsonparse-ex(descrizione dell'implementazione)
-
-
-;;p-vl (modifica)
+;;p-vl 
 Nome esteso: parse-value
-La funzione riceve in input una lista di codici di caratteri, elimina i whitespace presenti e crea una 
-lista nuova, dopo aver riconosciuto i valori json. Quest' ultima operazione viene svolta dalla funzione
-d' appoggio 'p-vl-ex'.
+La funzione riceve in input una lista di caratteri, e crea una nuova lista attraverso
+l'uso di una funzione di appoggio 'p-vl-ex' applicata prima alla testa e poi al corpo 
+della lista di caratteri in ingresso.
+che intercetta il tipo di valore e ne fa il parsing.
 
-;;p-vl-ex 8 (modifica)
+;;p-vl-ex  
 Nome esteso: parse-value-execute
-La funzione controlla qual'è il primo elemento della lista e chiama il corrispondente 
-parser - object, array, true, false, null, string o number.
+La funzione controlla qual'è il primo elemento della lista e, una volta intercettato il tipo di valore,
+ne fa il parsing andando a chiamare la funzione di gestione corrispondente - object, array, true, 
+false, null, string o number.
 
 ;;p-obj (modifica)
 Nome esteso: parse-object
-La funzione riceve in input una lista di codici e passa alla funzione di appoggio 'p-obj-ex' i seguenti parametri:
-- la lista di codici di caratteri ricevuta in input
+La funzione riceve in input una lista di codici e passa alla funzione di appoggio 'p-obj-ex'
+ i seguenti parametri:
+- la lista di caratteri ricevuta in input
 - uno stato di partenza
-- 
--
-Se la lista di codici di caratteri è vuota restituisce errore.
+- un template relativo ad una coppia
+- un contenitore per le coppie parsate
+Se la lista di caratteri è vuota restituisce errore.
 
 ;;p-obj-ex (modifica)
 Nome esteso: parse-object-execute
-La funzione riceve in input una lista, uno stato e due parametri vuoti, ed è gestita come se
-fosse un automa, i cui stati e il loro funzionamento sono elencati qui di seguito:
-1) Viene innanzitutto verificato se il primo elemento di tale lista è una parentesi graffa; se 
+La funzione riceve in input una lista, uno stato e due contenitori vuoti, ed è gestita come se
+fosse un automa, ll cui funzionamento viene elencato di seguito:
+1) Viene innanzitutto verificato se il primo elemento di tale lista è una parentesi graffa aperta; se 
 tale condizione è verificata, vengono eliminati possibili whitespace dal resto della lista e si 
 passa allo stato successivo.
 2) Se il resto della lista è una parentesi graffa chiusa, il json-object si chiude e il parsing è terminato.
-Prendo il primo e il secondo elemento e dopo aver effettuato la conversione da codici di caratteri a char,
- li unisco in unica lista e passo allo stato successivo.
-3) 
+Quando questo avviene, vengono presi il primo elemento e il resto della lista e convertiti in stringa
+attraverso la funzione di appoggio 'p-str'.
+Il primo elemento viene inserito all'interno del primo contenitore (p)relativo a .......
+ e il resto della lista viene passato come argomento all'interno della stessa funzione 'p-obj-ex'.
+3) Solamente quando viene incontrato (solitamente dopo una Chiave della coppia chiave-valore),
+il carattere relativo ai due punti ( : ), si passa allo stato successivo 2, dove vengono presi
+ il primo elemento del resto della lista (della posizione corrispondente ad un valore) 
+che viene passato alla funzione 'p-vl'. La stessa operazione viene svolta sulla parte rimanente
+della lista in input.
+..........................................................................
+4) Quando il primo elemento della lista di caratteri è una virgola si passa al 3 stato...........
 
-Altrimenti, se la lista di codici di caratteri è vuota, viene ritornato errore.
+5) Quando il primo elemento della lista di caratteri è una parentesi graffa chiusa viene ritornata
+la stringa finale introdotta dalla dicitura 'jsonobj' e seguita dall'insieme di coppie che l'oggetto
+json contiene.
+Questo stato dell' automa è raggiungibile solamente dal primo o dal terzo stato: in questo modo
+la macchina a stati finiti riconosce oggetti di tipo jsonobj vuoti ( {} ) o oggetti di tipo jsonob
+che contengono coppie chiave-valore.
+Se la lista di codici di caratteri in input è vuota, viene ritornato errore.
 
 ;;p-arr
 
@@ -275,15 +302,6 @@ La funzione riceve in input una lista ed una stringa, e ritorna una stringa che 
 La funzione prende il primo elemento di tale lista e controlla se è un numero json; 
 
 
-;;estr-vl (da aggiungere)
-Nome esteso: estrai-valore
-La funzione serve per estrarre un valore da una lista di coppie in base ad una chiave.
-
-
-;;estr-vl-ex 
-Nome esteso: estrai-valore-execute
-
-
 ;;ver-ls-pr
 Nome esteso: verifica-lista-pair
 La funzione controlla se l'input è una lista; se è così, chiama la funzione 'ver-ls-pr-ex'.
@@ -313,3 +331,27 @@ Nel caso in cui l'input non fosse una lista viene restituito errore.
 
 
 ;;;;;; PARTE JSONACCESS
+
+
+;;jsonaccess
+
+
+
+;;jsonaccess_ex
+
+
+
+;;ver-fields
+
+
+
+;;ver-fields-ex
+
+
+;;estr-vl (da aggiungere)
+Nome esteso: estrai-valore
+La funzione serve per estrarre un valore da una lista di coppie in base ad una chiave.
+
+
+;;estr-vl-ex 
+Nome esteso: estrai-valore-execute
