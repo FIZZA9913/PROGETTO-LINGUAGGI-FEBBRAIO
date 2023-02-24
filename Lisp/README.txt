@@ -41,6 +41,9 @@ L'unico problema è che ovviamente questo file non sarà apribile con un semplic
 - Su Windows abbiamo notato che in certe condizioni vengono aggiunti dei caratteri alla fine del file,
 anche in modo casuale reiterando la traduzione del file.
 
+- Poiché la gestione dei numeri varia da sistema a sistema, preferiamo usare la forma esponenziale
+nella produzione inversa della stringa.
+
 - Le varie funzioni e le rispettive ausiliarie sono divise in sezioni e il loro funzionamento
 è spiegato qua sotto.
 
@@ -113,254 +116,160 @@ Stati:
 Se la lista di codici di caratteri in input è vuota o se nessuna delle condizioni è verificata, viene ritornato errore.
 
 ;; p-arr
-La funzione controlla se ciò che ha ricevuto in input è una lista di caratteri; se tale condizione
-è soddisfatta, viene passata tale lista alla funzione di appoggio 'p-arr-ex', insieme ad uno stato
-iniziale, e ad un contenitore vuoto.
+Accetta in input una lista di codici di carattere, richiama la funzione ausiliaria p-arr-ex
+e configura l'automa a stati finiti.
 
 ;; p-arr-ex
-La funzione descrive il comportamento di un automa a stati finiti che riconosce un array json 
-attraverso i seguenti stati:
-0) Se il primo carattere è una parentesi quadrata aperta, viene passato il resto della lista senza
-whitespace allo stato successivo.
-1) Fino a quando non si incontra il carattere di parentesi quadrata chiusa, viene fatto il parsing dell'
-elemento in testa alla lista e del primo elemento del resto della lista.
-Dopodiché viene chiamata ricorsivamente la funzione su ciò che rimane della lista e si passa allo stato 
-successivo.
-Se il carattere incontrato è una parentesi quadrata chiusa, il parsing del jsonarray termina, e si passa
-allo stato finale.
-2) Quando l'elemento in testa alla lista è un carattere di virgola ( , ) viene fatto il parsing del secondo
-elemento in lista, mentre tutto ciò che rimane viene usato per richiamare nuovamente l' automa
-e continuare il parsing.
-3) Nel momento in cui la funzione raggiunge il carattere parentesi quadrata chiusa, viene 
-creata la lista composta dalla dicitura 'jsonarray seguito dall' insieme di tutti gli elementi 
-salvati nel contenitore 'elem'. 
+Automa a stati finiti:
+Input: Lista di codici di caratteri
+Stati:
+	a0: Stato iniziale (con [ ignora i whitespaces e passa in a1).
+	a1: Stato intermedio (riconosce value e passa in a2).
+	a2: Stato finale (con ] restituisce l'array e la lista di codici rimanenti, altrimenti riconosce value).
 Se la lista di codici in input è vuota o non viene rispettata la sintassi riconosciuta dall'automa a
-stati finiti, viene ritornato errore.
+stati finiti, o nessuna condizione è verificata, viene ritornato errore.
 
 ;; p-ws
-Se la lista ricevuta in input è una lista di codici (il ché è controllato dalla funzione 'ver-ls-cod'), 
-allora viene passata alla funzione di appoggio 'p-ws-ex' descritta di seguito.
+Valuta l'input con ver-ls-cod e richiama la funzione ausiliaria p-ws-ex.
 
 ;; p-ws-ex
-La funzione elimina, attraverso una ricerca ricorsiva elemento dopo elemento, 
-tutti i whitespace presenti nella lista di codici.
-Una volta che tutti i whitespace sono stati cancellati, viene ritornata la lista di codici.
+Elimina ricorsivamente tutti i whitespace iniziali nella lista di codici.
+Ritorna la lista di codici rimanenti.
 
-;;p-str
-Se la lista ricevuta in input è una lista di codici (il ché è controllato dalla funzione 'ver-ls-cod'), 
-questa viene prima trasformata in stringa attraverso la funzione 'conv-ls-str', e poi passata alla  
-funzione 'p-str-ex' descritta qui di seguito.
+;; p-str
+Valuta l'input con ver-ls-cod, richiama l'ausiliaria p-str-ex passando come argomento
+l'input trasformato da conv-ls-str.
 
-;;p-str-ex
-La funzione riceve in input una stringa.
-Tale stringa viene accettata solamente se ha una lunghezza maggiore o uguale a 2.
-La funzione ritorna la sotto-stringa contenuta tra i primi due apici doppi;
- dopodiché cerca ricorsivamente altre sotto-stringhe.
+;; p-str-ex
+Accetta una stringa di lunghezza maggiore o uguale a 2 in input,
+ritorna la sotto-stringa contenuta tra i primi due apici doppi;
+dopodiché cerca ricorsivamente altre sotto-stringhe.
 Se non è più possibile estrarre sotto-stringhe o la stringa ricevuta in input
- ha una lunghezza minore di 2, viene ritornato un errore.
+ha una lunghezza minore di 2, viene ritornato un errore.
 
-;;p-num
-Nome esteso: parse-number
-La funzione controlla se ciò che ha ricevuto in input è una lista di caratteri; 
-se tale condizione è verificata passa tale lista alla funzione
- 'p-num-ex', insieme alla stringa vuota.
+;; p-num
+Riceve in input una lista di codici di caratteri; 
+richiama l'ausiliaria p-num-ex.
 
-;;p-num-ex 
-Nome esteso: parse-number-execute
-La funzione riceve in input una lista ed una stringa, e ritorna una stringa
- che identifica un numero json.
-La funzione prende il primo elemento di tale lista e controlla se è un numero, un segno
-positivo o negativo, oppure il simbolo e/E per la notazione esponenziale.
-Il numero finale viene costruito applicando ricorsivamente questa funzione alla lista in input.
-Una volta ottenuto tale numero, questo viene riscritto in formato esponenziale e ritornato. 
+;; p-num-ex 
+La funzione riceve in input una lista ed una stringa, e ritorna il numero json e
+la lista di codici rimanenti.
 
-;;p-true
-Nome esteso: parse-true
-La funzione controlla se ciò che ha ricevuto in input è una lista di caratteri; 
-se tale condizione è verificata converte la lista di caratteri in una stringa e 
-la passa alla funzione di appoggio 'p-true-ex', descritta di seguito.
+;; p-true (p-false, p-null)
+Accetta in input è una lista di caratteri e richiama la funzione aux p-true-ex.
 
-;;p-true-ex
-Nome esteso: parse-true-execute
+;; p-true-ex (p-false-ex, p-null-ex)
 La funzione riceve in input una stringa. Se all'interno della stringa è presente 'true' 
 estrae la sotto-stringa e la converte in una lista di caratteri.
 Se all'interno della stringa non è presente 'true' o la stringa non è lunga almeno 4 caratteri, viene
 ritornato un errore.
 
-;;p-false
-Nome esteso: parse-false
-La funzione controlla se ciò che ha ricevuto in input è una lista di caratteri; 
-se tale condizione è verificata converte la lista di caratteri in una stringa e
-la passa alla funzione di appoggio 'p-false-ex', descritta di seguito.
-
-;;p-false-ex
-Nome esteso: parse-false-execute
-La funzione riceve in input una stringa. Se all'interno della stringa è presente 'false',
-estrae la sotto-stringa e la converte in una lista di caratteri.
-Se all'interno della stringa non è presente 'false' o la stringa non è lunga  almeno 5 caratteri, 
-viene ritornato un errore.
-
-;;p-null 
-Nome esteso: parse-null
-La funzione controlla se ciò che ha ricevuto in input è una lista di caratteri; 
-se tale condizione è verificata converte la lista di caratteri in una stringa e
-la passa alla funzione di appoggio 'p-null-ex', descritta di seguito.
-
-;;p-null-ex
-Nome esteso: parse-null-execute
-La funzione riceve in input una stringa. Se all'interno della stringa è presente 'null', 
-estrae la sotto-stringa e la converte in una lista di caratteri.
-Se all'interno della stringa non è presente 'null' o la stringa non è lunga almeno 4 caratteri, viene
-ritornato un errore.
-
-;;trad-inv 
-Nome esteso: traduction-inverse
-La funzione controlla se l'input è una lista di caratteri; se tale condizione è verificata
- viene chiamata la funzione 'trad-inv-ex'.
+;; trad-inv 
+La funzione controlla se l'input è una lista di codici di caratteri; richiama la funzione 'trad-inv-ex'.
 Altrimenti, viene ritornato errore.
 
-;;trad-inv-ex 
-Nome esteso: traduction-inverse-execute
+;; trad-inv-ex 
 La funzione controlla due possibili scenari:
 1) il primo elemento della lista è un jsonobject - viene invocato la funzione 'jsonobj'
 2) il primo elemento della lista è un jsonarray - viene invocato la funzione 'jsonarray'
-Se la lista in input è vuota, o il primo elemento della lista non appartiene alle casistiche di cui sopra,
+Se la lista in input è vuota, o il primo elemento della lista non appartiene alle casistiche cui sopra,
  viene ritornato errore.
 
-;;jsonobj
+;; jsonobj
 La funzione controlla se ciò che ha ricevuto in input  è una lista di coppie; 
 se tale condizione è verificata la lista viene passata alla funzione di appoggio 'jsonobj-ex' assieme alla
-stringa di inizio jsonobject " { " .
+stringa di inizio jsonobject "{" .
 Altrimenti, viene ritornato un errore.
 
-;;jsonobj-ex  
-Nome esteso: jsonobject-execute
+;; jsonobj-ex
 La funzione riceve in input una lista di coppie e traduce il jsonobject in formato stringa.
-Per questo motivo, quando la funzione viene eseguita su una lista di coppie, effettua una traduzione delle
-coppie in maniera ricorsiva, prima separandole attraverso la virgola - grazie alla funzione 'virgola' - e 
-successivamente le concatena.
+Produce ricorsivamente le coppie, inserisce la virgola dove richiesto con la funzione virgola, richiama la funzione ausiliaria.
 Quando la funzione viene invece eseguita su una lista di coppie vuota, concatena ciò che è stato tradotto
- sino a quel momento con la stringa " } " . 
+ sino a quel momento con la stringa "}" . 
 
-;;trad-pr
-Nome esteso: traduzione-pair
-La funzione riceve in input una coppia e le concatena diversi caratteri per uniformarla al formato
-richiesto json. Dopodiché chiama sul resto della coppia (ossia un valore) la funzione 
-di appoggio 'trad-pr-ex'.
+;; trad-pr
+Riceve in input una coppia di un oggetto JSON, concatena la key con :, richiama l'ausiliaria trad-pr-ex.
 
-;;trad-pr-ex
-Nome esteso: traduzione-pair-execute
+;; trad-pr-ex
 La funzione controlla che tipo di valore è presente nella coppia:
 - Se il valore è una stringa, viene uniformata al formato json con apici doppi.
 - Se il valore è un numero - un intero o float - viene scritto in rappresentazione esponenziale.
 - Se il valore è un booleano - true, false o null - viene restituito il valore booleano corrispondente.
-- Se il valore è un jsonobject chiama la funzione d'appoggio 'trad-inv', che gestirà il caso specifico.
-- Se il valore è un jsonarray chiama la funzione di'appoggio 'trad-inv', che gestirà il caso specifico.
+- Se il valore è un jsonobject o jsonarray chiama la funzione trad-inv che gestirà il caso specifico.
 Altrimenti restituisce un errore.
 
-;;jsonarray
-La funzione controlla se il valore in input è una lista; se tale condizione  è verificata viene chiamata la funzione
- di appoggio 'jsonarray-ex'. 
+;; jsonarray
+Acceta in input una lista, richiama l'ausiliaria jsonarray-ex.
 Altrimenti, viene ritornato un errore.
 
-;;jsonarray-ex
-Nome esteso: jsonarray-execute
-La funzione traduce il jsonarray in formato stringa.
-Per questo motivo, quando la funzione viene eseguita su una lista di elementi, svolge la traduzione di quest' ultimi
+;; jsonarray-ex
+La funzione riconosce il jsonarray.
+Per questo motivo, quando la funzione viene eseguita su una lista di elementi, svolge la traduzione di questi ultimi
 gestendo le diverse casistiche:
 - Elemento = stringa : la stringa 'trd' risultante conterrà l'elemento uniformato alle stringhe dello standard json 
 attraverso l'implementazione di apici doppi, a cui seguirà la virgola.
-- Elemento = numero : la stringa 'trd' risultante conterrà l'elemento in formato esponenziale solamente se 
-tale elemento è un float o un integer.
+- Elemento = numero : la stringa 'trd' risultante conterrà l'elemento in formato esponenziale.
 - Elemento = true/false/null : la stringa 'trd' risultante conterrà il valore booleano corrispondente, 
 seguito da una virgola.
 - Elemento = jsonobj/jsonarray : la stringa 'trd' risultante viene ottenuta attraverso l' applicazione della funzione
-'trad-inv' che traduce l'intero jsonobj/jsonarray in una stringa.
-Una volta gestita una di queste casistiche, la funzione esegue ricorsivamente la traduzione degli elementi successivi
+'trad-inv' che riconosce l'intero jsonobj/jsonarray.
+Una volta gestita una di queste casistiche, la funzione esegue ricorsivamente il riconoscimento degli elementi successivi
 e ritorna la stringa finale che è il risultato della concatenazione di tutte le traduzioni.
-Quando la funzione viene eseguita su una lista di elementi vuota,  concatena tale stringa composta con la stringa " ] " . 
-
-
+Quando la funzione viene eseguita su una lista di elementi vuota,  concatena tale stringa composta con la stringa "]".
 
 ;;;;;; PARTE JSONACCESS
 
-;;jsonaccess 
-La funzione riceve in input un dato di tipo json e un campo fields, che viene 
-utilizzato per cercare il valore all'interno del dato.
+;; jsonaccess 
+La funzione riceve in input un dato di tipo json e un numero variabile di argomenti fields, che viene 
+utilizzato per derivare il valore se possibile.
 Questa funzione gestisce due tipi di casistiche:
-- il dato passato in input è un jsonobject
-- il dato passato in input è un jsonarray
-In qualsiasi caso viene utilizzata la funzione 'trad-inv' per trasformare il dato JSON  in input
-dal formato object in una stringa.
-Se il dato passato è un jsonarray e il campo fields è vuoto, viene ritornato errore; 
-altrimenti, se il campo field presenta una corretta sintassi (verificata dalla funzione 'ver-field' descritta più avanti),
-la nuova stringa viene passata alla funzione di appoggio 'jsonaccess-ex' che svolge l'attività
-di accesso alla stringa attraverso il termine fields.
-(aggiungere caso jsonobj? se non viene verificata la condizione speciale
-relativa al jsonarray con fields vuoto)
+- l'input è un jsonobject: ritorna il valore cercato se esiste con la funzione ausiliaria jsonaccess-ex.
+- l'input è un jsonarray: ritorna il valore cercato con la funzione ausiliaria jsonaccess-ex.
+Con lista vuota ritorna un errore.
 
-;;jsonaccess-ex
-Nome esteso: jsonaccess-execute
-La funzione controlla che tipo di dato ha di fronte - jsonobject o jsonarray - dopodiché esamina l'intera lista 
-ricorsivamente per controllare se la variabile fields unifica con la chiave di una coppia chiave-valore (nel caso di jsonobj),
- oppure con un elemento del jsonarray.
-Dopo la prima unificazione, la funzione viene eseguita in maniera ricorsiva per controllare se esistono altri valori
- del campo fields che unifichino con il resto della stringa in input.
-Quando il campo fields è vuoto, viene ritornato il risultato della ricerca eseguita fino a quel momento dalla funzione.
-Nel caso in cui sia impossibile accedere ai dati, o si cerchi di accedere ad un indice che supera i limiti dell'array, 
+;; jsonaccess-ex
+A second adell'input, jsonobject o jsonarray, richiama i predicati per estrarre il valore cercato.
+Nel caso in cui sia impossibile accedere ai dati o si cerchi di accedere ad un indice che supera i limiti dell'array
 viene ritornato un errore.
 
-;;estr-vl 
-Nome esteso: estrai-valore
+;; estr-vl 
 La funzione serve per estrarre un valore da una lista di coppie in base ad una chiave
 che viene passata in input.
 
-;;ver-ls-cod
-Nome esteso: verifica-lista-codici
+;; ver-ls-cod
 La funzione controlla se l'input è una lista (in particolare viene passata una lista di codici) 
 e se questa condizione è verificata, tale lista viene passata alla funzione di appoggio 'ver-ls-cod-ex'.
 In altri casi, la funzione ritorna 'nil'.
 
-;;ver-ls-cod-ex
-Nome esteso: verify-list-codes-execute
+;; ver-ls-cod-ex
 La funzione controlla se la lista in input è vuota; se tale condizione è verificata viene ritornato 'true'.
 Se la lista non è vuota viene verificato, partendo dal primo elemento della lista 
-e continuando ricorsivamente sul suo resto, che la lista contenga codici numerici.
+e continuando ricorsivamente che la lista contenga codici numerici.
 Nel caso in cui siano presenti degli elementi all'interno della lista che non siano numeri, viene ritornato 'nil'.
 
-;;ver-ls-pr
-Nome esteso: verify-list-pair
+;; ver-ls-pr
 La funzione controlla se l'input è una lista; se è così, chiama la funzione 'ver-ls-pr-ex'.
 Altrimenti, restituisce 'nil'.
 
-;;ver-ls-pr-ex
-Nome esteso: verifiy-list-pair-execute
-Se la lista è vuota, viene restituito 'true'.
-Se la lista contiene degli elementi, viene passata la prima coppia alla funzione 'ver-pr' descritta poco più avanti,
-e viene effettuata una chiamata ricorsiva sul resto della lista alla funzione 'ver-ls-pr-ex'.
-Nel caso in cui la lista non sia vuota e allo stesso tempo non contenga  coppie 'Chiave Valore' al suo interno, 
-viene restituito 'nil'.
+;; ver-ls-pr-ex
+Verifica ricorsivamente se ogni elemento della lista è una coppia JSON.
 
-;;ver-pr 
-Nome esteso: verify-pair
+;; ver-pr
 La funzione controlla prima di tutto se ciò che ha ricevuto in input è una lista.
 Dopodiché verifica se tale lista è una coppia 'Chiave Valore', ossia una sequenza  formata da soli due elementi.
 Se l'input in ingresso è effettivamente una lista, viene restituito 'true', altrimenti viene ritornato il valore 'nil'.
 
-;;virgola
+;; virgola
 La funzione controlla prima di tutto se ciò che ha ricevuto in input è una lista.
-Se il dato in ingresso è una lista, viene verificato se è formata da  un solo elemento (ossia il resto della lista è vuota);
- in questo caso viene restituito " ", altrimenti viene inserita una virgola ' , '.
+Se il dato in ingresso è una lista, viene verificato se è formata da un solo elemento (ossia il resto della lista è vuota);
+ in questo caso viene restituito "", altrimenti viene inserita una virgola ",".
 Nel caso in cui l'input non fosse una lista viene restituito errore. 
 
-;;ver-fields
-Nome esteso: verify-fields
+;; ver-fields
 La funzione controlla se ciò che ha ricevuto in input è una lista; se tale condizione è verificata la lista viene passata
  alla funzione di appoggio 'ver-fields-ex' , descritta di seguito.
 
-;;ver-fields-ex
-Nome esteso: verify-fields-execute
+;; ver-fields-ex
 La funzione verifica ricorsivamente se il primo elemento della lista ricevuta in input sia una stringa o un numero. 
 Quando uno dei campi di fields non è né una stringa né un numero, viene ritornato nil.
-
 

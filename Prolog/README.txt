@@ -14,9 +14,9 @@ perfettamente utilizzabili e funzionanti anche singolarmente tranne:
 Un utilizzo dei predicati appena citati con parametri inaspettati potrebbe causare bug 
 o eccezioni non controllate.
 Ovviamente qualche predicato potrebbe restituire valori che non hanno senso nel contesto json, ad esempio
-jsonarray([true], "a", X) restituisce X = "a[true]" perchè ovviamente sono pensati per lavorare in sintonia
+jsonarray([true], "a", X) restituisce X = "a[true]" perché ovviamente sono pensati per lavorare in sintonia
 per una traduzione in un contesto creato da jsonparse.
-L'utilizzo con parametri particolari non genera comunque errori perchè ogni predicato verifica 
+L'utilizzo con parametri particolari non genera comunque errori perché ogni predicato verifica 
 i suoi input e quindi al massimo fallisce.
 
 2) I vari predicati si comportano in maniera ambigua di fronte a stringhe che presentano
@@ -167,7 +167,7 @@ stato s1 e l'atomo aggiornato.
 Tale predicato serve a riconoscere numeri json da una lista di caratteri in input e lo fa avvalendosi di una
 variabile temporanea, in questo caso un atomo vuoto.
 Molto semplicemente fino a quando il primo carattere della lista in input è compatibile con un possibile numero,
-overo caratteri come:
+ovvero caratteri come:
 -cifre da zero a nove
 -punto
 -e oppure E
@@ -222,7 +222,7 @@ I due casi sono i seguenti:
 
 Nel primo caso procede a tradurre tale termine in una stringa e a concatenarla con la traduzione in ingresso.
 Nel secondo caso si passa il controllo al predicato applica il quale avrà il compito di richiamare
-il predicato correttp relativo alla traduzione dell'oggetto o array innestato.
+il predicato corretto relativo alla traduzione dell'oggetto o array innestato.
 
 /*
  * jsonarray
@@ -260,7 +260,7 @@ Predicato citato nel testo del progetto, esso prende in input un oggetto/array j
 e un nome di un file scritto come atomo o stringa.
 
 Scrive sul file passato come input la traduzione dell'oggetto/array json in formato json standard.
-Se il file non è presente viene creato mentre se è gia presente viene sovrascritto.
+Se il file non è presente viene creato mentre se è già presente viene sovrascritto.
 
 I passaggi che fa il seguente predicato sono i seguenti:
 -verifica se il nome del file è scritto come atomo o stringa
@@ -275,7 +275,7 @@ Predicato citato nel testo del progetto, prende in input un nome di file scritto
 variabile dove salvare il risultato della lettura.
 
 Quest'ultimo parametro può anche non essere una variabile in quanto questo predicato può rispondere anche a
-query del tipo jsonread('foo.json', jsonarray([X]) oppure jsonread('foo.json', jsonarray(["mario"])).
+query del tipo jsonread('foo.json', jsonarray([X]) oppure jsonread('foo.json', jsonarray(["element"])).
 
 Se il nome del file indica un nome di file non esistente il predicato fallisce.
 
@@ -385,9 +385,4 @@ Se l'indice è pari a zero, allora viene restituito il primo elemento della list
 altrimenti si percorre ricorsivamente l'intera lista
 fino al momento in cui l'indice non arriva a zero, ritornando il risultato.
 Se l'indice in input è maggiore della lunghezza della lista il predicato fallisce.
-
-
-
-
-
 
