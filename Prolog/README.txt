@@ -16,7 +16,7 @@ o eccezioni non controllate.
 Ovviamente qualche predicato potrebbe restituire valori che non hanno senso nel contesto json, ad esempio
 jsonarray([true], "a", X) restituisce X = "a[true]" perché ovviamente sono pensati per lavorare in sintonia
 per una traduzione in un contesto creato da jsonparse.
-L'utilizzo con parametri particolari non genera comunque errori perché ogni predicato verifica 
+L'utilizzo con parametri particolari non genera comunque errori perché ogni predicato utilizzabile verifica 
 i suoi input e quindi al massimo fallisce.
 
 2) I vari predicati si comportano in maniera ambigua di fronte a stringhe che presentano
@@ -60,7 +60,7 @@ il predicato della libreria standard atom_codes il quale traduce l'atomo in una 
 di codici di caratteri la quale sarà data in pasto al predicato riconosci_e_traduci che fornirà la traduzione
 in formato object.
 
-Per la modalità 2 jsonparse chiama il predicato applica, il quale una volta riconosciuto il tipo di dato
+Per la modalità 2 jsonparse chiama il predicato applica il quale una volta riconosciuto il tipo di dato
 in input andrà a richiamare il predicato corrispondente con le opportune modifiche.
 
 Per la modalità 3 jsonparse non fa altro che tradurre il formato json standard in formato object
@@ -103,7 +103,7 @@ e passa allo stato o1.
 
 2) Una volta che si trova nello stato o1 e il codice in input è un apice doppio
 procede a richiamare il predicato stringa per il riconoscimento della chiave e poi il predicato whitespace.
-Successivamente effettua la chiamata ricorsiva sul resto della lista passandogli come input il nuovo
+Effettua successivamente la chiamata ricorsiva sul resto della lista passandogli come input il nuovo
 stato o2 e la chiave appena riconosciuta.
 
 3) Una volta che si trova nello stato o2 dopo aver riconosciuto la chiave chiama il predicato value
@@ -134,7 +134,7 @@ direttamente a posizionare il valore riconosciuto sulla lista elements.
 */
 
 Il suo compito è semplicemente quello di rimuovere caratteri di spaziatura 
-da una lista in input fino a quando non incontra un codice non compatibile con un carattere di spaziatura.
+da una lista in input fino a quando incontra un codice non compatibile con un carattere di spaziatura.
 Se la lista è vuota oppure il primo codice non è un carattere di spaziatura ritorna la lista tale e quale.
 
 /*
@@ -310,7 +310,7 @@ innestati per evitare eccezioni potenzialmente fatali)
 e valori compound che necessitano di una chiamata apposita)
 -atomo_o_stringa verifica se l'input è un atomo o una stringa (utile a jsonread e jsondump)
 -verifica_lista è il predicato presentato a lezione e verifica se l'input è una lista
--applica chiama il predicato passatogli in input con le opportune modifiche e verifiche
+-applica chiama il predicato passatogli in input (solo se jsonobj o jsonarray) con le opportune modifiche e verifiche
 
 PARTE AGGIUNTA IN SEGUITO ALLA COSTRUZIONE DI JSONACCESS
 
@@ -318,8 +318,8 @@ PARTE AGGIUNTA IN SEGUITO ALLA COSTRUZIONE DI JSONACCESS
 * Field è una lista del tipo : [Field | Fields]
 */
 Si osserva la struttura del campo Field quando esso è una lista. 
-In questo frangente, Field può contenere una sequenza di stringhe e numeri 
-che rappresentano la chiave delle coppie (Chiave, Valore) del jsonobject, oppure
+In questo frangente Field può contenere una sequenza di stringhe e numeri 
+che rappresentano la chiave delle coppie (Chiave, Valore) del jsonobject oppure
 la posizione di un elemento in un jsonarray.
 
 /*
@@ -327,12 +327,12 @@ la posizione di un elemento in un jsonarray.
 */
 E' il secondo predicato principale citato nel testo del progetto.
 Questo predicato può prendere in input un oggetto composto di tipo jsonobj(Members) oppure di tipo jsonarray(Elements), 
-dopodiché un campo Field che può essere rappresentata in due forme: lista o stringa.
+dopodiché un campo Field che può essere rappresentato in due forme: lista o stringa.
 Nel caso in cui l'input al predicato jsonaccess sia un jsonarray e 
 il campo Field sia una lista vuota il predicato fallisce.
 Quando invece l'input di jsonaccess è un jsonobject o un jsonarray, 
 allora Field potrà essere una lista (non vuota per jsonarray) oppure una stringa SWI-prolog (caso speciale). 
-Il predicato jsonaccess permette, percorrendo il contenuto del campo Field di ottenere il risultato della ricerca, Result.
+Il predicato jsonaccess permette percorrendo il contenuto del campo Field di ottenere il risultato della ricerca, Result.
 Per eseguire quest'operazione il predicato jsonaccess si appoggia al predicato jsonaccess_execute. 
 
 /*
@@ -341,9 +341,9 @@ Per eseguire quest'operazione il predicato jsonaccess si appoggia al predicato j
 Nel caso in cui il valore in ingresso sia un jsonarray il campo Field è rappresentato 
 da una lista il cui primo elemento è un numero, il quale esprime l'indice 
 attraverso cui effettuare la ricerca del valore.
-Quando viene invocato questo predicato, si svolge una chiamata a "elemento_i_esimo" che prende in input un array
+Quando viene invocato questo predicato si svolge una chiamata a "elemento_i_esimo" che prende in input un array
 e restituisce un Risultato in base al valore dell'indice (Field).
-(Ciò significa che nel caso in cui venga passato un Field di tipo stringa o lista, viene restituito un errore).
+(Ciò significa che nel caso in cui venga passato un Field il cui primo elemento è una stringa, il predicato fallisce).
 Una volta estrapolato tale valore grazie al predicato elemento_i_esimo
 viene effettuata la chiamata ricorsiva sull'ultimo elemento trovato ed il
 resto della lista Fields.
@@ -354,14 +354,13 @@ Nel caso in cui il campo Field sia una lista vuota viene ritornato tale valore.
 */
 Il funzionamento di questo predicato non cambia dalla sua variante con jsonarray,
 il fine ultimo è quello di usare la lista Field per ottenere il RisultatoFinale.
-E' opportuno ricordare che jsonobject è un dato composto, 
-formato da coppie di tipo (Chiave, Value), ossia delle strutture che vengono riconosciute nel linguaggio Prolog.
-Le coppie sono strutture del tipo '(Chiave, Valore)' dove Chiave è una stringa SWI Prolog, 
+E' opportuno ricordare che jsonobject è un dato composto formato da coppie di tipo (Chiave, Valore).
+Le coppie sono strutture del tipo '(Chiave, Valore)' dove Chiave è una stringa SWI Prolog 
 mentre il Valore può essere a sua volta una stringa SWI Prolog,
 un numero, true, false, null, oppure un oggetto json come jsonobject o jsonarray.
 Tale valore viene estratto grazie al predicato estrai_valore quando la 
-Chiave della coppia unifica con il primo elemento del campo field.
-Anche in questo caso, una volta estrapolato il valore viene effettuata la chiamata ricorsiva
+Chiave della coppia unifica con il primo elemento del campo Field.
+Anche in questo caso, una volta estrapolato il valore, viene effettuata la chiamata ricorsiva
 su di esso e sul resto della lista Fields.
 Nel caso in cui il campo Field sia una lista vuota viene ritornato tale valore.
 
@@ -374,14 +373,14 @@ Nel caso in cui il campo Field sia una lista vuota viene ritornato tale valore.
 */
 Questo predicato riceve in input una lista di coppie (Chiave, Valore), una stringa Field e ritorna il valore associato. 
 Nel caso in cui Field unifichi con la chiave della prima coppia in input viene restituito il valore associato.
-Se questo non avviene, estrai_valore percorre l'intera lista di coppie finché la chiave di una coppia non unifica con Field.
-Quando nessuno di questi casi ha successo, viene restituito false.
+Se questo non avviene estrai_valore percorre l'intera lista di coppie finché la chiave di una coppia non unifica con Field.
+Quando nessuno di questi casi ha successo viene restituito false.
 
 /*
 * elemento_i_esimo
 */
 Questo predicato riceve in input una lista, un indice e restituisce un risultato.
-Se l'indice è pari a zero, allora viene restituito il primo elemento della lista,
+Se l'indice è pari a zero allora viene restituito il primo elemento della lista
 altrimenti si percorre ricorsivamente l'intera lista
 fino al momento in cui l'indice non arriva a zero, ritornando il risultato.
 Se l'indice in input è maggiore della lunghezza della lista il predicato fallisce.
