@@ -218,15 +218,15 @@ Quando la funzione viene eseguita su una lista di elementi vuota concatena tale 
 ;;;;;; PARTE JSONACCESS
 
 ;; jsonaccess 
-La funzione riceve in input un dato di tipo json e un numero variabile di argomenti fields, che viene 
+La funzione riceve in input un oggetto o array json e un numero variabile di argomenti fields che viene 
 utilizzato per derivare il valore se possibile.
 Questa funzione gestisce due tipi di casistiche:
 - l'input è un jsonobject: ritorna il valore cercato se esiste con la funzione ausiliaria jsonaccess-ex.
 - l'input è un jsonarray: ritorna il valore cercato con la funzione ausiliaria jsonaccess-ex.
-Con lista vuota ritorna un errore.
+Con lista vuota ritorna un errore se l'input è un jsonarray.
 
 ;; jsonaccess-ex
-A second adell'input, jsonobject o jsonarray, richiama i predicati per estrarre il valore cercato.
+A seconda dell'input, jsonobject o jsonarray, richiama i predicati per estrarre il valore cercato.
 Nel caso in cui sia impossibile accedere ai dati o si cerchi di accedere ad un indice che supera i limiti dell'array
 viene ritornato un errore.
 
@@ -236,38 +236,38 @@ che viene passata in input.
 
 ;; ver-ls-cod
 La funzione controlla se l'input è una lista (in particolare viene passata una lista di codici) 
-e se questa condizione è verificata, tale lista viene passata alla funzione di appoggio 'ver-ls-cod-ex'.
-In altri casi, la funzione ritorna 'nil'.
+e se questa condizione è verificata tale lista viene passata alla funzione di appoggio 'ver-ls-cod-ex'.
+Se l'input non è una lista di codici di caratteri ritorna NIL.
 
 ;; ver-ls-cod-ex
-La funzione controlla se la lista in input è vuota; se tale condizione è verificata viene ritornato 'true'.
+La funzione controlla se la lista in input è vuota; se tale condizione è verificata viene ritornato T.
 Se la lista non è vuota viene verificato, partendo dal primo elemento della lista 
-e continuando ricorsivamente che la lista contenga codici numerici.
-Nel caso in cui siano presenti degli elementi all'interno della lista che non siano numeri, viene ritornato 'nil'.
+e continuando ricorsivamente che la lista contenga codici numerici che identificano caratteri.
+Nel caso in cui siano presenti degli elementi all'interno della lista che non siano numeri viene ritornato 'nil'.
 
 ;; ver-ls-pr
-La funzione controlla se l'input è una lista; se è così, chiama la funzione 'ver-ls-pr-ex'.
-Altrimenti, restituisce 'nil'.
+La funzione controlla se l'input è una lista; se è così chiama la funzione 'ver-ls-pr-ex',
+altrimenti restituisce 'nil'.
 
 ;; ver-ls-pr-ex
 Verifica ricorsivamente se ogni elemento della lista è una coppia JSON.
 
 ;; ver-pr
 La funzione controlla prima di tutto se ciò che ha ricevuto in input è una lista.
-Dopodiché verifica se tale lista è una coppia 'Chiave Valore', ossia una sequenza  formata da soli due elementi.
-Se l'input in ingresso è effettivamente una lista, viene restituito 'true', altrimenti viene ritornato il valore 'nil'.
+Dopodiché verifica se tale lista è una coppia 'Chiave Valore', ossia una sequenza formata da soli due elementi.
+Se l'input in ingresso è effettivamente una lista viene restituito T, altrimenti viene ritornato il valore 'nil'.
 
 ;; virgola
 La funzione controlla prima di tutto se ciò che ha ricevuto in input è una lista.
-Se il dato in ingresso è una lista, viene verificato se è formata da un solo elemento (ossia il resto della lista è vuota);
- in questo caso viene restituito "", altrimenti viene inserita una virgola ",".
+Se il dato in ingresso è una lista viene verificato se è formata da un solo elemento (ossia il resto della lista è vuota);
+in questo caso viene restituito "" altrimenti viene inserita una virgola ", ".
 Nel caso in cui l'input non fosse una lista viene restituito errore. 
 
 ;; ver-fields
 La funzione controlla se ciò che ha ricevuto in input è una lista; se tale condizione è verificata la lista viene passata
- alla funzione di appoggio 'ver-fields-ex' , descritta di seguito.
+alla funzione di appoggio 'ver-fields-ex' descritta di seguito.
 
 ;; ver-fields-ex
 La funzione verifica ricorsivamente se il primo elemento della lista ricevuta in input sia una stringa o un numero. 
-Quando uno dei campi di fields non è né una stringa né un numero, viene ritornato nil.
+Quando uno dei campi di fields non è né una stringa né un numero viene ritornato nil.
 
