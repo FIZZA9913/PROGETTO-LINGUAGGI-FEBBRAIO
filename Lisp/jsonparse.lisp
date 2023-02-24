@@ -116,7 +116,12 @@
         ((= (first c-ls) 102) (p-false c-ls))
         ((= (first c-ls) 110) (p-null c-ls))
         ((= (first c-ls) 34) (p-str c-ls))
-        (t (p-num c-ls))))
+        ((or (= (first c-ls) 43)
+             (= (first c-ls) 45)
+             (and (>= (first c-ls) 48)
+                  (<= (first c-ls) 57)))
+         (p-num c-ls))
+        (t (error "Errore di sintassi in p-vl"))))
 
 ;; fine funzione p-vl per riconoscimento valori json
 
@@ -469,7 +474,7 @@
 (defun jsonarray (elem)
   (if (listp elem)
       (jsonarray-ex elem "[")
-    (error "L'input di jsonarray non e' una lista")))
+    (error "L'input di jsonarray non e' una lista di elementi")))
 
 (defun jsonarray-ex (elem trd)
   (cond ((null elem)
@@ -541,7 +546,8 @@
   (cond ((null fields)
          JSON)
         ;; object
-        ((and (eql (first JSON)
+        ((and (listp JSON)
+              (eql (first JSON)
                    'jsonobj)
               (stringp (first fields)))
          (let ((res (estr-vl (rest JSON)
@@ -551,7 +557,8 @@
                               (rest fields))
              (error "Impossibile accedere ai dati"))))
         ;; array
-        ((and (eql (first JSON)
+        ((and (listp JSON)
+              (eql (first JSON)
                    'jsonarray)
               (integerp (first fields)))
          (let ((res (nth (first fields)
