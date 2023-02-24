@@ -304,12 +304,15 @@
                                str
                                (string (code-char num-as-code))))
       ;; verifica e ritorno del numero
-      (let ((num (read-from-string str)))
-        (if (or (integerp num)
-                (floatp num))
-            (list num
-                  ls-cs)
-          (error "Errore di sintassi in p-num"))))))
+      (if (not (equal str ""))
+          (let ((num (read-from-string str)))
+            (if (or (integerp num)
+                    (floatp num))
+                (list num
+                      ls-cs)
+              ;; errori
+              (error "Errore di sintassi in p-num")))
+        (error "Errore di sintassi in p-num")))))
 
 ;; fine funzione p-num per riconoscimento
 ;; numeri json
