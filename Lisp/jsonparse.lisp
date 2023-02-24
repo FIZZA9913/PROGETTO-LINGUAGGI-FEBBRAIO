@@ -267,7 +267,7 @@
       (let ((start (position #\" str))
             (end (position #\" str :start 1)))
         ;; verifica stringa
-        (if (and (= start 0)
+        (if (and (eql start 0)
                  (not (eql end NIL))
                  (stringp (subseq str 1 end)))
             ;; ritorno stringa
@@ -305,15 +305,15 @@
                                str
                                (string (code-char num-as-code))))
 	;; verifica e ritorno del numero
-	(if (not (equal str ""))
+        (if (not (equal str ""))
             (let ((num (read-from-string str)))
               (if (or (integerp num)
                       (floatp num))
                   (list num
 			ls-cs)
-		  ;; errori
-		  (error "Errore di sintassi in p-num")))
-            (error "Errore di sintassi in p-num")))))
+                ;; errori
+                (error "Errore di sintassi in p-num")))
+          (error "Errore di sintassi in p-num")))))
 
 ;; fine funzione p-num per riconoscimento
 ;; numeri json

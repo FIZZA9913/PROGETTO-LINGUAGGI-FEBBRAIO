@@ -245,8 +245,7 @@ stringa_execute([C | Cs], Result, Temp, Q, Codes_left) :-
     Q = s1,
     C \= 34,
     !,
-    atom_codes(Atom, [C]),
-    atom_concat(Temp, Atom, Temp1),
+    concatenate(Temp, C, Temp1),
     stringa_execute(Cs, Result, Temp1, s1, Codes_left).
 
 stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
@@ -269,24 +268,19 @@ stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
 */
 
 numero(Codes_in, Result, Codes_left) :-
-    numero_execute(Codes_in, Result, '', Codes_left).
+    numero_execute(Codes_in, Result, '', nu0, Codes_left).
 
-numero_execute([], Result, Temp, []) :-
-    atom_to_term(Temp, Term, _),
-    number(Term),
-    Result = Term.
-
-numero_execute([C | Cs], Result, Temp, Codes_left) :-
-    number_acceptable(C),
+numero_execute([C | Cs], Result, Temp, Q, Codes_left) :-
+    delta_numero(Q, C, N),
     !,
-    atom_codes(Atom, [C]),
-    atom_concat(Temp, Atom, Temp1),
-    numero_execute(Cs, Result, Temp1, Codes_left).
+    concatenate(Temp, C, Temp1),
+    numero_execute(Cs, Result, Temp1, N, Codes_left).
 
-numero_execute([C | Cs], Result, Temp, [C | Cs]) :-
-    atom_to_term(Temp, Term, _),
-    number(Term),
-    Result = Term.
+numero_execute(Codes, Result, Temp, Q, Codes) :-
+    verifica_lista(Codes),
+    final_state_number(Q),
+    !,
+    atom_to_term(Temp, Result, _).
 
 /*
  * fine predicato numero per
@@ -445,6 +439,51 @@ final_state_array(a1).
 final_state_array(a2).
 
 % fine final_state_array
+% inizio final_state_number
+
+final_state_number(nu2).
+final_state_number(nu4).
+final_state_number(nu6).
+
+% fine final_state_number
+% inizio delta_numero
+
+delta_numero(nu0, X, nu1) :-
+    plus_or_minus(X),
+    !.
+delta_numero(nu0, X, nu2) :-
+    single_digit(X),
+    !.
+delta_numero(nu1, X, nu2) :-
+    single_digit(X),
+    !.
+delta_numero(nu2, X, nu3) :-
+    X = 46,
+    !.
+delta_numero(nu2, X, nu5) :-
+    e_or_E(X),
+    !.
+delta_numero(nu3, X, nu4) :-
+    single_digit(X),
+    !.
+delta_numero(nu4, X, nu5) :-
+    e_or_E(X),
+    !.
+delta_numero(nu5, X, nu6) :-
+    single_digit(X),
+    !.
+delta_numero(nu5, X, nu7) :-
+    plus_or_minus(X),
+    !.
+delta_numero(nu7, X, nu6) :-
+    single_digit(X),
+    !.
+delta_numero(Q, X, Q) :-
+    single_digit(X),
+    final_state_number(Q),
+    !.
+
+% fine delta_numero
 % inizio whitespace_acceptable
 
 whitespace_acceptable(9).  %\t
@@ -453,20 +492,25 @@ whitespace_acceptable(13). %\r
 whitespace_acceptable(32). %spazio
 
 % fine whitespace_acceptable
-% inizio number_acceptable
+% inizio plus_or_minus
 
-number_acceptable(Code) :-
+plus_or_minus(43). % +
+plus_or_minus(45). % -
+
+% fine plus_or_minus
+% inizio e_or_E
+
+e_or_E(69).  % E
+e_or_E(101). % e
+
+% fine e_or_E
+% inizio single_digit
+
+single_digit(Code) :-
     Code >= 48,
-    Code =< 57,
-    !.
+    Code =< 57.
 
-number_acceptable(43).  %+
-number_acceptable(45).  %-
-number_acceptable(46).  %.
-number_acceptable(69).  %E
-number_acceptable(101). %e
-
-% fine number_acceptable
+% fine single_digit
 % inizio chiamabile
 
 chiamabile(jsonobj).
@@ -526,6 +570,15 @@ applica(Jsonobj, Trad_in, Trad_out) :-
     call(Chiamabile).
 
 % fine applica
+% inizio concatenate
+
+concatenate(Atom, Code, Result) :-
+    atom(Atom),
+    integer(Code),
+    atom_codes(Atom1, [Code]),
+    atom_concat(Atom, Atom1, Result).
+
+% fine concatenate
 
 /*
  * fine predicati utils

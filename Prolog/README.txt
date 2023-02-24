@@ -166,17 +166,13 @@ stato s1 e l'atomo aggiornato.
 
 Tale predicato serve a riconoscere numeri json da una lista di caratteri in input e lo fa avvalendosi di una
 variabile temporanea, in questo caso un atomo vuoto.
-Molto semplicemente fino a quando il primo carattere della lista in input è compatibile con un possibile numero,
-ovvero caratteri come:
--cifre da zero a nove
--punto
--e oppure E
--+ o -
-procede a trasformarlo in carattere e lo concatena alla variabile temporanea.
-Una volta che la lista in input è vuota (caso in cui si decida di usare il predicato singolarmente) oppure il primo
-carattere della lista non è più compatibile con un numero procede a convertire la variabile temporanea in un termine
-prolog e verifica se è un numero chiamando il predicato della libreria standard number.
-Se il risultato è true procede a ritornare tale valore e la lista di codici rimanenti.
+Il suo funzionamento è quello di un automa a stati finiti e non fa altro che verificare la sua funzione delta
+in cerca del prossimo stato in base al codice in input.
+Se esiste una delta congrua allora concatena tale carattere sull'atomo usato come variabile temporanea ed effettua
+la chiamata ricorsiva sulla lista di codici rimanenti e sul nuovo stato.
+Quando la funzione delta non è più soddisfatta e ci troviamo in uno stato finale significa che abbiamo terminato il
+riconoscimento del numero e quindi il predicato precede a trasformare l'atomo temporaneo in un termine e a ritornarlo
+assieme alla lista di codici rimanenti.
 
 /*
  * true, false e null
@@ -298,8 +294,12 @@ predicati oppure per svolgere compiti di minore importanza.
 I predicati sono i seguenti:
 -final_state_obj verifica se l'input è uno stato finale per l'automa di traduzione degli oggetti
 -final_state_array ha un comportamento identico ma per gli array
+-final_state_number ha un comportamento identico ma per i numeri
+-delta_numero è la funzione delta per l'automa numero
 -whitespace_acceptable indica i codici dei caratteri che sono uno spazio
--number_acceptable indica i codici dei caratteri che potrebbero essere presenti in un numero intero/float
+-plus_or_minus indica i codici dei caratteri che sono un + o un -
+-e_or_E indica i codici dei caratteri che sono e oppure E
+-single_digit indica i codici dei caratteri che sono cifre da 0 a 9
 -chiamabile serve a verificare se quel predicato è chiamabile (utile alle varie chiamate per oggetti/array 
 innestati per evitare eccezioni potenzialmente fatali)
 -valore_base indica i valori json true, false e null
@@ -311,6 +311,8 @@ e valori compound che necessitano di una chiamata apposita)
 -atomo_o_stringa verifica se l'input è un atomo o una stringa (utile a jsonread e jsondump)
 -verifica_lista è il predicato presentato a lezione e verifica se l'input è una lista
 -applica chiama il predicato passatogli in input (solo se jsonobj o jsonarray) con le opportune modifiche e verifiche
+-concatenate concatena l'atomo passatogli in input con il codice del carattere trasformato in atomo
+e restituisce il risultato di tale concatenazione
 
 PARTE AGGIUNTA IN SEGUITO ALLA COSTRUZIONE DI JSONACCESS
 
