@@ -39,7 +39,7 @@ la traduzione desiderata.
 4) Se nel predicato jsondump viene passato un nome di un file con una estensione non esistente questo 
 predicato procede comunque a creare il file e a scriverci sopra il risultato della traduzione senza
 generare alcuna eccezione o errore e il risultato sarà inoltre leggibile senza problemi con jsonread.
-L'unico problema è che ovviamente questo file non sarà apribile.
+L'unico problema è che ovviamente questo file non sarà apribile con un semplice doppio click.
 
 5) i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
 qua sotto.

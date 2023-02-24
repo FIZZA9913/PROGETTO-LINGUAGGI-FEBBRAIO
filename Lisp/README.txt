@@ -5,10 +5,11 @@ Pascone, Michele, 820633
 Paulicelli, Sabino, 856111
 
 Premesse:
+
 - Le varie funzioni al di fuori di quelle richieste dal testo del progetto sono perfettamente
 utilizzabili e funzionanti anche singolarmente a patto ovviamente di non utilizzare i 
 predicati ausiliari con l'abbreviazione -ex perché hanno bisogno di specifici parametri
-passati precedentemente.
+passati precedentemente, oltre che jsonobj, jsonarray, trad-pr, estr-vl.
 Un utilizzo delle funzioni -ex con parametri diversi da quelli aspettati potrebbe causare 
 errori o eccezioni non controllate.
 Ovviamente qualche funzione potrebbe restituire valori che non hanno senso nel contesto json
@@ -35,7 +36,10 @@ restituisce la traduzione desiderata.
 questa funzione procede comunque a creare il file e a scriverci sopra il risultato della
 traduzione senza generare alcuna eccezione o errore e il risultato sarà inoltre leggibile
 senza problemi con jsonread.
-L'unico problema è che ovviamente questo file non sarà apribile.
+L'unico problema è che ovviamente questo file non sarà apribile con un semplice doppio click.
+
+- Su Windows abbiamo notato che in certe condizioni vengono aggiunti dei caratteri alla fine del file,
+anche in modo casuale reiterando la traduzione del file.
 
 - Le varie funzioni e le rispettive ausiliarie sono divise in sezioni e il loro funzionamento
 è spiegato qua sotto.
@@ -47,112 +51,73 @@ La funzione richiama 'trad-inv' sulla struttura JSON, convertendolo in formato s
 Se filename non è una stringa, o l'oggetto JSON non è stato costruito correttamente,
 viene ritornato errore.
 
-;;jsonread 
+;; jsonread 
 La funzione prende in input un filename e ritorna una lista, risultato della funzione 'jsonparse'. 
 
-;;jsonparse 
-La funzione controlla se ciò che ha ricevuto in input sia una stringa (che identifica una struttura json);
-se tale condizione è soddisfatta l'input viene trasformato in una lista di caratteri senza whitespace,
-e poi passata alla funzione di supporto 'jsonparse-ex', che si occuperà del riconoscimento
+;; jsonparse 
+La funzione controlla se ciò che ha ricevuto in input sia una stringa (il contenuto di un file json);
+se tale condizione è soddisfatta l'input viene trasformato in una lista di caratteri, ingnorando leading e trailing whitespaces,
+poi passata alla funzione di supporto 'jsonparse-ex', che si occuperà del riconoscimento
 del tipo di dato in input - jsonobj o jsonarray.
 Nel caso in cui il dato in ingresso non rappresenti una stringa, viene ritornato errore.
 
-;;jsonparse-ex (da modificare)
-Nome esteso: jsonparse-execute
+;; jsonparse-ex
 La funzione riceve in input una lista di caratteri e gestisce una serie di casistiche diverse:
-- Se il primo carattere della lista è una parentesi graffa aperta, viene riconosciuto un jsonobject e 
+- Se il primo carattere della lista è una parentesi graffa aperta viene riconosciuto un jsonobject e 
 la lista viene passata alla funzione 'p-obj' che fa il parsing dell'oggetto.
-- Se il primo carattere della lista è una parentesi quadrata aperta, viene riconosciuto un jsonarray
+- Se il primo carattere della lista è una parentesi quadrata aperta viene riconosciuto un jsonarray
 e la lista viene passata alla funzione 'p-arr' che fa il parsing dell'array.
 - Se non si presenta nessuna di queste due casistiche viene ritornato un errore.
 
-;;conv-str-ls
-Nome esteso: convert-string-list
-La funzione controlla se ciò che ha ricevuto in input sia una stringa,
- dopodiché converte tale stringa in una lista di caratteri e la
- passa al funzione 'conv-str-ls-ex'.
+;; conv-str-ls
+La funzione controlla che l'input sia una stringa,
+dopodiché converte tale stringa in una lista di caratteri chiama la funzione 'conv-str-ls-ex'.
 Altrimenti, se il parametro in input non è una stringa, viene ritornato 'nil'.
 
-;;conv-str-ls-ex
-Nome esteso: convert-string-list-execute
-La funzione crea, partendo da una stringa, la lista di caratteri
- attraverso la funzione 'char-code' di Lisp.
+;; conv-str-ls-ex
+La funzione accetta una lista di caratteri e produce una lista di codici in modo ricorsivo,
+usando la macro char-code.
 Se la lista di caratteri in input è vuota, ritorna 'nil'.
 
-;;conv-ls-str
-Nome esteso: convert-list-string
-Funzione che dopo aver verificato che ciò che ha ricevuto in input è una lista di codici,
- la trasforma in una stringa invocando 'conv-ls-str-ex', una funzione di appoggio
-a cui viene passata una stringa vuota da riempire.
+;; conv-ls-str
+Verifica che l'input sia una lista di codici, produce una stringa invocando 'conv-ls-str-ex',
+una funzione di appoggio a cui viene passata una stringa vuota da riempire.
  
-;;conv-ls-str-ex
-Nome esteso: convert-list-string-execute
-La funzione crea partendo da una lista di caratteri
- una stringa Lisp attraverso la funzione 'code-char' di Lisp, 
-che viene usata ricorsivamente sull'intera lista 
-partendo dal primo elemento fino all' ultimo.
-Se la lista di codici di caratteri è vuota, la funzione ritorna " ".
+;; conv-ls-str-ex
+Accetta in input una lista di caratteri e una stringa, produce una stringa dalla lista di caratteri ricorsivamente,
+con l'ausilio della macro code-char.
+Se la lista di codici di caratteri è vuota, la funzione ritorna "".
 
-;;p-vl 
-Nome esteso: parse-value
+;; p-vl
 La funzione riceve in input una lista di caratteri, e crea una nuova lista attraverso
-l'uso di una funzione di appoggio 'p-vl-ex' applicata prima alla testa e poi al corpo 
-della lista di caratteri in ingresso, ne intercetta il tipo di valore e ne fa il parsing.
+l'uso di una funzione di appoggio 'p-vl-ex' che restituisce il valore riconosciuto e
+la lista di codici rimanenti.
 
-;;p-vl-ex  
-Nome esteso: parse-value-execute
-La funzione controlla qual'è il primo elemento della lista e, una volta intercettato il tipo di valore,
-ne fa il parsing andando a chiamare la funzione di gestione corrispondente - object, array, true, 
-false, null, string o number.
-Se il valore passato non presenta la sintassi corretta, viene ritornato errore.
+;; p-vl-ex
+Valuta il primo elemento della lista e richiama la funzione di parsing corrispondente.
+Se il primo codice non ha corrispondenze, viene ritornato errore.
 
-;;p-obj (modifica)
-Nome esteso: parse-object
-La funzione riceve in input una lista di codici e passa alla funzione di appoggio 'p-obj-ex'
- i seguenti parametri:
-- la lista di caratteri ricevuta in input
-- uno stato di partenza
-- un template relativo ad una coppia (?)
-- un contenitore per le coppie parsate (?)
+;; p-obj
+Accetta in input una lista di codici e richiama la funzione ausiliaria p-obj-ex
+passando gli argomenti necessari preparare lo stato iniziale dell'automa a stati finiti.
 Se la lista di caratteri è vuota restituisce errore.
 
-;;p-obj-ex (modifica)
-Nome esteso: parse-object-execute
-La funzione riceve in input una lista di caratteri, uno stato e due contenitori vuoti,
- ed è gestita come se fosse un automa, ll cui funzionamento viene elencato di seguito:
-0) Viene innanzitutto verificato se il primo elemento di tale lista è una parentesi graffa aperta; se 
-tale condizione è verificata, vengono eliminati possibili whitespace dal resto della lista e si 
-passa allo stato successivo.
-1) Se il resto della lista è una parentesi graffa chiusa, il json-object si chiude e il parsing è terminato.
-Quando questo avviene, vengono presi il primo elemento e il resto della lista e convertiti in stringa
-attraverso la funzione di appoggio 'p-str'.
-Il primo elemento viene inserito all'interno del primo contenitore (p)relativo a .......
- e il resto della lista viene passato come argomento all'interno della stessa funzione 'p-obj-ex'.
-2) Solamente quando viene incontrato - solitamente dopo una Chiave della coppia chiave-valore -
-il carattere relativo ai due punti ( : ), si passa allo stato successivo 2, dove viene fatto il parsing
- del secondo elemento in lista (della posizione corrispondente ad un valore) e di ciò che 
-rimane nella lista attraverso la funzione 'p-vl'.
-Dopodiché, i caratteri rimanenti vengono passati ricorsivamente all'automa.
-3) Quando il primo elemento della lista di caratteri è una virgola viene svolto il parsing del secondo
-elemento in lista (alla quale sono rimossi eventuali whitespace).
-Ciò che rimane della lista viene trasformato in stringa e passato ricorsivamente all'automa,
-seguendo le indicazioni degli stati precedenti.
-4) Quando il primo elemento della lista di caratteri è una parentesi graffa chiusa, viene ritornata
-la stringa finale introdotta dalla dicitura 'jsonobj' e seguita dall'insieme di coppie che l'oggetto
-json contiene.
-Questo stato dell' automa è raggiungibile solamente dal primo o dal terzo stato: in questo modo
-la macchina a stati finiti riconosce oggetti di tipo jsonobj vuoti ( {} ) o oggetti di tipo jsonob
-che contengono coppie chiave-valore.
-Se la lista di codici di caratteri in input è vuota, viene ritornato errore.
+;; p-obj-ex
+Automa a stati finiti:
+Input: Lista di codici di caratteri
+Stati:
+	o0: Stato iniziale (con { ignora i whitespaces e passa in o1). 
+	o1: Stato finale (con } riconosce un oggetto vuoto, altrimenti va in o2).
+	o2: Stato intermedio (con : riconosce la chiave di un oggetto, la appende alla lista p e va in o3).
+	o3: Stato intermedio (con , riconosce il valore di un oggetto, la appende alla lista p e va in o2).
+Se la lista di codici di caratteri in input è vuota o se nessuna delle condizioni è verificata, viene ritornato errore.
 
-;;p-arr
-Nome esteso: parse-array
+;; p-arr
 La funzione controlla se ciò che ha ricevuto in input è una lista di caratteri; se tale condizione
 è soddisfatta, viene passata tale lista alla funzione di appoggio 'p-arr-ex', insieme ad uno stato
 iniziale, e ad un contenitore vuoto.
 
-;;p-arr-ex
-Nome esteso: parse-array-execute
+;; p-arr-ex
 La funzione descrive il comportamento di un automa a stati finiti che riconosce un array json 
 attraverso i seguenti stati:
 0) Se il primo carattere è una parentesi quadrata aperta, viene passato il resto della lista senza
@@ -172,13 +137,11 @@ salvati nel contenitore 'elem'.
 Se la lista di codici in input è vuota o non viene rispettata la sintassi riconosciuta dall'automa a
 stati finiti, viene ritornato errore.
 
-;;p-ws
-Nome esteso: parse-whitespace
+;; p-ws
 Se la lista ricevuta in input è una lista di codici (il ché è controllato dalla funzione 'ver-ls-cod'), 
 allora viene passata alla funzione di appoggio 'p-ws-ex' descritta di seguito.
 
-;;p-ws-ex
-Nome esteso: parse-whitespace-execute
+;; p-ws-ex
 La funzione elimina, attraverso una ricerca ricorsiva elemento dopo elemento, 
 tutti i whitespace presenti nella lista di codici.
 Una volta che tutti i whitespace sono stati cancellati, viene ritornata la lista di codici.
