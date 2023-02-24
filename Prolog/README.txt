@@ -6,7 +6,7 @@ Paulicelli, Sabino, 856111
 
 Premesse:
 
-1)i vari predicati al di fuori di quelli richiesti dal testo del progetto sono
+1) I vari predicati al di fuori di quelli richiesti dal testo del progetto sono
 perfettamente utilizzabili e funzionanti anche singolarmente tranne:
 -predicati _execute
 -predicato traduzione_pair
@@ -19,7 +19,7 @@ per una traduzione in un contesto creato da jsonparse.
 L'utilizzo con parametri particolari non genera comunque errori perchè ogni predicato verifica 
 i suoi input e quindi al massimo fallisce.
 
-2)I vari predicati si comportano in maniera ambigua di fronte a stringhe che presentano
+2) I vari predicati si comportano in maniera ambigua di fronte a stringhe che presentano
 i seguenti caratteri, generando errori o risultati inattesi:
 -\/ in quanto non è riconosciuto come carattere di escape in prolog
 -\" in quanto nell'ambiente SWI-prolog viene riconosciuto come apice doppio ("), 
@@ -27,7 +27,7 @@ rendendo di conseguenza questi due caratteri indistinguibili
 -\\ in quanto \ è un carattere speciale in prolog e nell'ambiente SWI-prolog viene riconosciuto
 come backslash (\) causando quindi gli stessi problemi di (\")
 
-3)Il parser fa solo un'analisi sintattica degli oggetti/array json quindi nel caso in cui un oggetto abbia chiavi
+3) Il parser fa solo un'analisi sintattica degli oggetti/array json quindi nel caso in cui un oggetto abbia chiavi
 duplicate il parser restituisce la traduzione corretta.
 Il problema si presenta quando bisogna stampare la seguente traduzione su file .json che giustamente 
 lo interpreta come errore di sintassi e lo stesso discorso vale per le stringhe che presentano al loro interno
@@ -36,12 +36,12 @@ e l'effetto è quello di avere una stringa stampata su 2 righe, cosa ovviamente 
 Questo non inficia comunque la validità del programma in quanto la lettura dallo stesso file restituisce
 la traduzione desiderata.
 
-4)Se nel predicato jsondump viene passato un nome di un file con una estensione non esistente questo 
+4) Se nel predicato jsondump viene passato un nome di un file con una estensione non esistente questo 
 predicato procede comunque a creare il file e a scriverci sopra il risultato della traduzione senza
 generare alcuna eccezione o errore e il risultato sarà inoltre leggibile senza problemi con jsonread.
 L'unico problema è che ovviamente questo file non sarà apribile.
 
-5)i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
+5) i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
 qua sotto.
 
 /*
