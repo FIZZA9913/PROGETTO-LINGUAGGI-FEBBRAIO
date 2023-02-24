@@ -591,7 +591,7 @@ jsonaccess_execute(Jsonobj, [], Jsonobj).
 % estrai_valore riceve in input una lista di coppie (Chiave,Valore)
 % appartententi ad un jsonobject e restituisce come risultato il valore
 % della coppia.
-% Il valore restituito è il valore della coppia (Chiave, Valore) quando
+% Il valore restituito e' il valore della coppia (Chiave, Valore) quando
 % Chiave = Field.
 % Quando questo non succede, si passa alla coppia successiva.
 
