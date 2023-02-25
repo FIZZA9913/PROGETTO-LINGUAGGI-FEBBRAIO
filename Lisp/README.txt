@@ -44,6 +44,9 @@ anche in modo casuale reiterando la traduzione del file.
 - Poiché la gestione dei numeri varia da sistema a sistema preferiamo usare la forma esponenziale
 nella produzione inversa della stringa.
 
+- La funzione jsondump funziona sia con path assoluti che relativi a patto che le sottocartelle
+esistano già (crea file non cartelle)
+
 - Le varie funzioni e le rispettive ausiliarie sono divise in sezioni e il loro funzionamento
 è spiegato qua sotto.
 
