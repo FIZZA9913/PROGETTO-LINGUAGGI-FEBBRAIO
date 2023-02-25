@@ -276,7 +276,6 @@
             ;; errori
             (error "Errore di sintassi in p-str")))
       (error "La lunghezza della lista di p-str non e' sufficiente"))) 
-;; potenziale errore su stringhe
 
 ;; fine funzione p-str per riconoscimento
 ;; stringhe json
