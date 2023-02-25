@@ -245,7 +245,8 @@ stringa_execute([C | Cs], Result, Temp, Q, Codes_left) :-
     Q = s1,
     C \= 34,
     !,
-    concatenate(Temp, C, Temp1),
+    atom_codes(Atom, [C]),
+    atom_concat(Temp, Atom, Temp1),
     stringa_execute(Cs, Result, Temp1, s1, Codes_left).
 
 stringa_execute([C | Cs], Result, Temp, Q, Cs) :-
@@ -273,7 +274,8 @@ numero(Codes_in, Result, Codes_left) :-
 numero_execute([C | Cs], Result, Temp, Q, Codes_left) :-
     delta_numero(Q, C, N),
     !,
-    concatenate(Temp, C, Temp1),
+    atom_codes(Atom, [C]),
+    atom_concat(Temp, Atom, Temp1),
     numero_execute(Cs, Result, Temp1, N, Codes_left).
 
 numero_execute(Codes, Result, Temp, Q, Codes) :-
@@ -570,15 +572,6 @@ applica(Jsonobj, Trad_in, Trad_out) :-
     call(Chiamabile).
 
 % fine applica
-% inizio concatenate
-
-concatenate(Atom, Code, Result) :-
-    atom(Atom),
-    integer(Code),
-    atom_codes(Atom1, [Code]),
-    atom_concat(Atom, Atom1, Result).
-
-% fine concatenate
 
 /*
  * fine predicati utils

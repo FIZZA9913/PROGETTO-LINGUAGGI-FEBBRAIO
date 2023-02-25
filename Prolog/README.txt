@@ -41,7 +41,10 @@ predicato procede comunque a creare il file e a scriverci sopra il risultato del
 generare alcuna eccezione o errore e il risultato sarà inoltre leggibile senza problemi con jsonread.
 L'unico problema è che ovviamente questo file non sarà apribile con un semplice doppio click.
 
-5) i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
+5) il predicato jsondump funziona sia con path assoluti che relativi a patto che le sottocartelle
+esistano già (crea file non cartelle)
+
+6) i vari predicati e i rispettivi ausiliari sono divisi in sezioni e il loro funzionamento è spiegato
 qua sotto.
 
 /*
@@ -171,7 +174,7 @@ in cerca del prossimo stato in base al codice in input.
 Se esiste una delta congrua allora concatena tale carattere sull'atomo usato come variabile temporanea ed effettua
 la chiamata ricorsiva sulla lista di codici rimanenti e sul nuovo stato.
 Quando la funzione delta non è più soddisfatta e ci troviamo in uno stato finale significa che abbiamo terminato il
-riconoscimento del numero e quindi il predicato precede a trasformare l'atomo temporaneo in un termine e a ritornarlo
+riconoscimento del numero e quindi il predicato procede a trasformare l'atomo temporaneo in un termine e a ritornarlo
 assieme alla lista di codici rimanenti.
 
 /*
@@ -311,8 +314,6 @@ e valori compound che necessitano di una chiamata apposita)
 -atomo_o_stringa verifica se l'input è un atomo o una stringa (utile a jsonread e jsondump)
 -verifica_lista è il predicato presentato a lezione e verifica se l'input è una lista
 -applica chiama il predicato passatogli in input (solo se jsonobj o jsonarray) con le opportune modifiche e verifiche
--concatenate concatena l'atomo passatogli in input con il codice del carattere trasformato in atomo
-e restituisce il risultato di tale concatenazione
 
 PARTE AGGIUNTA IN SEGUITO ALLA COSTRUZIONE DI JSONACCESS
 
